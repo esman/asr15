@@ -5,12 +5,12 @@
 #include "../periph/utils.h"
 #include "../periph/display.h"
 
-#define ALGO_COUNT_INDEX 0
-#define ALGO_PLUS1_INDEX 1
-#define ALGO_RESET_INDEX 2
+#define ALGO_RESET_INDEX 7
+#define ALGO_PLUS1_INDEX 6
+#define ALGO_COUNT_INDEX 5
 
-#define ALGO_RUN_INDEX 0
-#define ALGO_CUT_INDEX 1
+#define ALGO_RUN_INDEX 2
+#define ALGO_CUT_INDEX 3
 
 #define ALGO_DELAY_SCALER 10
 #define ALGO_DELAY (algoDelay * ALGO_DELAY_SCALER)

@@ -13,17 +13,17 @@
 #define LCD_COLUMNS 132
 
 #define LCD_LED_PORT GPIOB
-#define LCD_LED_PIN GPIO_Pin_14
+#define LCD_LED_PIN GPIO_Pin_3
 
 #define LCD_RESET_PORT GPIOB
-#define LCD_RESET_PIN GPIO_Pin_9
+#define LCD_RESET_PIN GPIO_Pin_2
 
-#define LCD_I2C_PORT I2C1
+#define LCD_I2C_PORT I2C2
 
 #define LCD_I2C_SCL_PORT GPIOB
-#define LCD_I2C_SCL_PIN GPIO_Pin_6
+#define LCD_I2C_SCL_PIN GPIO_Pin_10
 #define LCD_I2C_SDA_PORT GPIOB
-#define LCD_I2C_SDA_PIN GPIO_Pin_7
+#define LCD_I2C_SDA_PIN GPIO_Pin_11
 
 #define RSETLCD_OFF GPIO_SetBits(LCD_RESET_PORT, LCD_RESET_PIN);
 #define RSETLCD_ON GPIO_ResetBits(LCD_RESET_PORT, LCD_RESET_PIN);
@@ -37,9 +37,9 @@
 #define I2C_TRANSMIT 1
 #define I2C_RECEIVE 0
 
-#define I2C_DMA_CHANNEL    DMA1_Channel6
-#define I2C_DMA_ISR_TCIF   DMA_ISR_TCIF6
-#define I2C_DMA_IFCR_CTCIF DMA_IFCR_CTCIF6
+#define I2C_DMA_CHANNEL    DMA1_Channel4
+#define I2C_DMA_ISR_TCIF   DMA_ISR_TCIF4
+#define I2C_DMA_IFCR_CTCIF DMA_IFCR_CTCIF4
 
 static uint8_t const LCD_CONFIG[] =
 {
@@ -68,7 +68,7 @@ static uint8_t const LCD_CONFIG[] =
 	// Set all pixels on
 	0xA4, // disable
 	// Set LCD mapping control
-	0xC6, // To rotate screen by 180 deg set 0xC6. 0 deg - 0xC0
+	0xC0, // To rotate screen by 180 deg set 0xC6
 	// Set test control
 	0xE4, // TT = 00
 	0x00, // testing parameter 0
@@ -297,12 +297,12 @@ void LcdOnBTF()
 	lcdFunc();
 }
 
-void I2C1_EV_IRQHandler()
+void I2C2_EV_IRQHandler()
 {
 	lcdI2CFunc();
 }
 
-void I2C1_ER_IRQHandler()
+void I2C2_ER_IRQHandler()
 {
 	LcdSystemReset();
 }
