@@ -17,7 +17,7 @@ void RCC_Configuration(void)
 
   /* Enable ADC1 and GPIOC clock */
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | RCC_APB2Periph_AFIO, ENABLE);
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD | RCC_APB2Periph_AFIO, ENABLE);
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1 | RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
 }
 
@@ -53,7 +53,7 @@ int main()
 	 
 	//update NVIC registers
 	NVIC_Init(&NVIC_InitStructure);
-	
+
 	Init();
 	
     for(;;) MainLoop();

@@ -2,16 +2,16 @@
 #include "stm32f10x_conf.h"
 
 #define IN1_GROUP GPIOA
-#define IN1_PIN GPIO_Pin_3
+#define IN1_PIN GPIO_Pin_1
 #define IN2_GROUP GPIOA
 #define IN2_PIN GPIO_Pin_2
 #define IN3_GROUP GPIOA
-#define IN3_PIN GPIO_Pin_4
+#define IN3_PIN GPIO_Pin_3
 
-#define OUT1_GROUP GPIOA
-#define OUT1_PIN GPIO_Pin_6
-#define OUT2_GROUP GPIOA
-#define OUT2_PIN GPIO_Pin_7
+#define OUT1_GROUP GPIOB
+#define OUT1_PIN GPIO_Pin_12
+#define OUT2_GROUP GPIOB
+#define OUT2_PIN GPIO_Pin_13
 
 void InitIO()
 {

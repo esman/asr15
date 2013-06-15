@@ -221,7 +221,7 @@ void LcdSet(int row, int column, int state)
 
 void LcdLight(int state)
 {
-	GPIO_WriteBit(LCD_LED_PORT, LCD_LED_PIN, state ? Bit_SET : Bit_RESET);
+	GPIO_WriteBit(LCD_LED_PORT, LCD_LED_PIN, state ? Bit_RESET : Bit_SET);
 }
 
 void LcdSendConfig()

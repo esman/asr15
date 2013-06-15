@@ -124,7 +124,10 @@ void MenuButtonFilter(int cur, int* prev, int* click)
 			}
 		}
 	}
-	else if(*prev) (*prev)--;
+	else
+        {
+          *prev = 0;
+        }
 }
 
 void MenuCheckButtons()
