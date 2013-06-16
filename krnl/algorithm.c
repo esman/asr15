@@ -4,13 +4,6 @@
 #include "../periph/utils.h"
 #include "../periph/display.h"
 
-#define ALGO_COUNT_INDEX 0
-#define ALGO_PLUS1_INDEX 1
-#define ALGO_RESET_INDEX 2
-
-#define ALGO_RUN_INDEX 0
-#define ALGO_CUT_INDEX 1
-
 #define ALGO_DELAY_SCALER 10
 #define ALGO_DELAY (algoDelay * ALGO_DELAY_SCALER)
 
@@ -52,7 +45,7 @@ void (*AlgoFunc)() = AlgoCountSpires;
 void AlgoMain()
 {
   static int prevCount;
-  if(GetIN(ALGO_COUNT_INDEX))
+  if(IO_GET_COUNT)
   {
     count = prevCount ? 0 : 1;
     prevCount = 1;
@@ -62,8 +55,9 @@ void AlgoMain()
     prevCount = 0;
     count = 0;
   }
-  reset = GetIN(ALGO_RESET_INDEX);
-  plus1 = GetIN(ALGO_PLUS1_INDEX);
+
+  reset = IO_GET_RESET;
+  plus1 = IO_GET_PLUS1;
 
   if(reset)
   {
@@ -86,9 +80,24 @@ void AlgoMain()
   }
 
   if(spirePreset >= ALGO_MIN_SPIRES) AlgoFunc();
-
-  SetOUT(ALGO_RUN_INDEX, run);
-  SetOUT(ALGO_CUT_INDEX, cut);
+  
+  if(run)
+  {
+    IO_SET_RUN;
+  }
+  else
+  {
+    IO_RESET_RUN;
+  }
+  
+  if(cut)
+  {
+    IO_SET_CUT;
+  }
+  else
+  {
+    IO_RESET_CUT;
+  }
 }
 
 void AlgoCountSpires()

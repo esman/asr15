@@ -2168,9 +2168,6 @@
     <name>$PROJ_DIR$\krnl\generic.h</name>
   </file>
   <file>
-    <name>$PROJ_DIR$\periph\io.c</name>
-  </file>
-  <file>
     <name>$PROJ_DIR$\periph\io.h</name>
   </file>
   <file>

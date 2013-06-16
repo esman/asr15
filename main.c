@@ -119,6 +119,17 @@ int main()
   | GPIO_CRL_CNF7_0 // Default - Input floating
   ;
 
+  GPIOB->CRH = (uint32_t) 0
+  | GPIO_CRH_CNF8_0 // Default - Input floating
+  | GPIO_CRH_CNF9_0 // Default - Input floating
+  | GPIO_CRH_CNF10_0 // Default - Input floating
+  | GPIO_CRH_CNF11_0 // Default - Input floating
+  | GPIO_CRH_MODE12_0 | GPIO_CRH_MODE13_1 // OUT1 - OUT Push-pull 50MHz
+  | GPIO_CRH_MODE12_0 | GPIO_CRH_MODE13_1 // OUT2 - OUT Push-pull 50MHz
+  | GPIO_CRH_CNF14_0 // Default - Input floating
+  | GPIO_CRH_CNF15_0 // Default - Input floating
+  ;
+
   GPIOC->CRH = (uint32_t) 0
   | GPIO_CRH_CNF8_0 // Default - Input floating
   | GPIO_CRH_CNF9_0 // Default - Input floating

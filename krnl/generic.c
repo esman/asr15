@@ -4,7 +4,6 @@
 #include "menu.h"
 #include "algorithm.h"
 #include "../periph/io.h"
-
 #include "../periph/display.h"
 
 void Init()

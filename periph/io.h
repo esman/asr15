@@ -1,11 +1,27 @@
 #ifndef IO_H_
 #define IO_H_
 
-void InitIO();
+#include "../gpio.h"
 
-int GetIN(int index);
-void SetOUT(int index, int state);
+#define IO_COUNT_PORT GPIOA
+#define IO_COUNT_PIN 1
+#define IO_RESET_PORT GPIOA
+#define IO_RESET_PIN 2
+#define IO_PLUS1_PORT GPIOA
+#define IO_PLUS1_PIN 3
 
-void ProcIO();
+#define IO_RUN_PORT GPIOB
+#define IO_RUN_PIN 12
+#define IO_CUT_PORT GPIOB
+#define IO_CUT_PIN 13
+
+#define IO_GET_COUNT GPIO_GET(IO_COUNT_PORT, IO_COUNT_PIN)
+#define IO_GET_RESET GPIO_GET(IO_RESET_PORT, IO_RESET_PIN)
+#define IO_GET_PLUS1 GPIO_GET(IO_PLUS1_PORT, IO_PLUS1_PIN)
+
+#define IO_SET_RUN GPIO_SET(IO_RUN_PORT, IO_RUN_PIN)
+#define IO_SET_CUT GPIO_SET(IO_CUT_PORT, IO_CUT_PIN)
+#define IO_RESET_RUN GPIO_RESET(IO_RUN_PORT, IO_RUN_PIN)
+#define IO_RESET_CUT GPIO_RESET(IO_CUT_PORT, IO_CUT_PIN)
 
 #endif /* IO_H_ */
