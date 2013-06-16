@@ -68,33 +68,16 @@ int main()
   | RCC_APB2ENR_IOPDEN // enable GPIO port D
   | RCC_APB2ENR_ADC1EN // enable ADC1
   ;
-  
-  // NVIC configuration
-  
-  NVIC_InitTypeDef NVIC_InitStructure;
-  
-  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-  
-  //select NVIC channel to configure
-  NVIC_InitStructure.NVIC_IRQChannel = I2C1_EV_IRQn;
-   
-  //set priority to lowest
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0F;
-   
-  //set subpriority to lowest
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0F;
-   
-  //enable IRQ channel
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-   
-  //update NVIC registers
-  NVIC_Init(&NVIC_InitStructure);
-  
-  //select NVIC channel to configure
-  NVIC_InitStructure.NVIC_IRQChannel = I2C1_ER_IRQn;
-   
-  //update NVIC registers
-  NVIC_Init(&NVIC_InitStructure);
+
+  /* NVIC configuration */
+  NVIC->ISER[0] = UINT32_BIT(I2C1_EV_IRQn % 32);
+  NVIC->ISER[1] = UINT32_BIT(I2C1_ER_IRQn % 32);
+  NVIC->IP[I2C1_EV_IRQn] = 0xFF;
+  NVIC->IP[I2C1_ER_IRQn] = 0xFF;
+
+  /* DMA configuration */
+  DMA1_Channel6->CPAR = (uint32_t) &I2C1->DR;
+  DMA1_Channel6->CCR  = DMA_CCR1_MINC | DMA_CCR1_DIR | DMA_CCR1_TEIE | DMA_CCR1_TCIE;  // NVIC configuration
 
   /* GPIO configuration */
   GPIOA->CRL = (uint32_t) 0
@@ -121,12 +104,12 @@ int main()
 
   GPIOB->CRH = (uint32_t) 0
   | GPIO_CRH_CNF8_0 // Default - Input floating
-  | GPIO_CRH_CNF9_0 // Default - Input floating
+  | GPIO_CRH_MODE9_0 | GPIO_CRH_MODE9_1 // LCD_RESET - OUT Push-pull 50MHz
   | GPIO_CRH_CNF10_0 // Default - Input floating
   | GPIO_CRH_CNF11_0 // Default - Input floating
   | GPIO_CRH_MODE12_0 | GPIO_CRH_MODE13_1 // OUT1 - OUT Push-pull 50MHz
   | GPIO_CRH_MODE12_0 | GPIO_CRH_MODE13_1 // OUT2 - OUT Push-pull 50MHz
-  | GPIO_CRH_CNF14_0 // Default - Input floating
+  | GPIO_CRH_MODE14_0 | GPIO_CRH_MODE14_1 // LCD_LED - OUT Push-pull 50MHz
   | GPIO_CRH_CNF15_0 // Default - Input floating
   ;
 
@@ -141,7 +124,7 @@ int main()
   | GPIO_CRH_CNF15_1 // Button 'OK' - Input pull-up
   ;
 
-  GPIOB->BSRR = UINT32_BIT(1); // FRAM_CS
+  GPIOB->BSRR = UINT32_BIT(1) | UINT32_BIT(14); // FRAM_CS, LCD_LED
   GPIOC->BSRR = (uint32_t) 0
   | UINT32_BIT(13) // Button 'DOWN' - Input pull-up
   | UINT32_BIT(14) // Button 'LEFT' - Input pull-up
@@ -151,7 +134,7 @@ int main()
   /* Remapping */
   AFIO->MAPR |= AFIO_MAPR_PD01_REMAP; //PD0 and PD1 to pins 5 and 6
   
- 	InitWatchdog();
+  InitWatchdog();
 
   /* Check FRAM is ready */
   uint32_t passphrase;
