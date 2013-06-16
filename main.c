@@ -7,26 +7,6 @@
 #include "periph/utils.h"
 #include "periph/watchdog.h"
 
-void RCC_Configuration(void)
-{
-#if defined (STM32F10X_LD_VL) || defined (STM32F10X_MD_VL) || defined (STM32F10X_HD_VL)
-  /* ADCCLK = PCLK2/2 */
-  RCC_ADCCLKConfig(RCC_PCLK2_Div2);
-#else
-  /* ADCCLK = PCLK2/4 */
-  RCC_ADCCLKConfig(RCC_PCLK2_Div4);
-#endif
-  /* Enable peripheral clocks ------------------------------------------------*/
-  /* Enable DMA1 clock */
-  //RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-
-  /* Enable ADC1 and GPIOC clock */
-  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
-  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB 
-  | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD | RCC_APB2Periph_AFIO | RCC_APB2Periph_ADC1, ENABLE);
-  RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1 | RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
-}
-
 extern int lineCounter;
 extern int linePreset;
 extern int spirePreset;
@@ -75,7 +55,19 @@ void IniAdc (void)
 
 int main()
 {
-  RCC_Configuration();
+  /* RCC configuration */
+  RCC->CFGR    = RCC_CFGR_ADCPRE_DIV2; // ADC frequency prescaler
+  RCC->AHBENR  = RCC_AHBENR_DMA1EN;    // enable DMA1
+  RCC->APB1ENR = RCC_APB1ENR_I2C1EN;   // enable I2C1
+
+  RCC->APB2ENR = (uint32_t) 0
+  | RCC_APB2ENR_AFIOEN // enable alternative functions
+  | RCC_APB2ENR_IOPAEN // enable GPIO port A
+  | RCC_APB2ENR_IOPBEN // enable GPIO port B
+  | RCC_APB2ENR_IOPCEN // enable GPIO port C
+  | RCC_APB2ENR_IOPDEN // enable GPIO port D
+  | RCC_APB2ENR_ADC1EN // enable ADC1
+  ;
   
   // NVIC configuration
   
