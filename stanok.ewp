@@ -1907,12 +1907,6 @@
     <name>$PROJ_DIR$\krnl\algorithm.h</name>
   </file>
   <file>
-    <name>$PROJ_DIR$\periph\backup.c</name>
-  </file>
-  <file>
-    <name>$PROJ_DIR$\periph\backup.h</name>
-  </file>
-  <file>
     <name>$PROJ_DIR$\periph\button.c</name>
   </file>
   <file>

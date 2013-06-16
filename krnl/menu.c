@@ -249,7 +249,7 @@ void MenuRoot()
 			MenuDrawSettings();
 			break;
 		case 2: //stat
-			MenuDrawStat();
+//			MenuDrawStat();
 			break;
 		case 3: //back
 			MenuDrawWork();

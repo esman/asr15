@@ -7,14 +7,14 @@
 
 void InitWatchdog()
 {
-	IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
-	IWDG_SetPrescaler(IWDG_Prescaler_4);
-	IWDG_SetReload(WATCHDOG_TIMEOUT);
-	IWDG_WriteAccessCmd(IWDG_WriteAccess_Disable);
-	IWDG_Enable();
+  IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);
+  IWDG_SetPrescaler(IWDG_Prescaler_4);
+  IWDG_SetReload(WATCHDOG_TIMEOUT);
+  IWDG_WriteAccessCmd(IWDG_WriteAccess_Disable);
+  IWDG_Enable();
 }
 
 void ResetWatchdog()
 {
-	IWDG_ReloadCounter();
+  IWDG_ReloadCounter();
 }

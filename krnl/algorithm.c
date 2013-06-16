@@ -1,7 +1,6 @@
 #include "algorithm.h"
 #include "generic.h"
 #include "../periph/io.h"
-#include "../periph/backup.h"
 #include "../periph/utils.h"
 #include "../periph/display.h"
 
@@ -50,191 +49,170 @@ void AlgoDelay();
 
 void (*AlgoFunc)() = AlgoCountSpires;
 
-void AlgoInit()
-{
-	lineCounter = BcpRead(ALGO_LINE_REGISTER);
-	// spireCounter = BcpRead(ALGO_SPIRE_REGISTER);
-	linePreset = BcpRead(ALGO_LINE_PRESET_REGISTER);
-	spirePreset = BcpRead(ALGO_SPIRE_PRESET_REGISTER);
-	algoDelay = BcpRead(ALGO_DELAY_REGISTER);
-	lineTotal = BcpRead(ALGO_TOTAL_LINES_REGISTER);
-	readyTotal = BcpRead(ALGO_TOTAL_READY_REGISTER);
-}
-
 void AlgoMain()
 {
-	static int prevCount;
-	if(GetIN(ALGO_COUNT_INDEX))
-	{
-		count = prevCount ? 0 : 1;
-		prevCount = 1;
-	}
-	else
-	{
-		prevCount = 0;
-		count = 0;
-	}
-	reset = GetIN(ALGO_RESET_INDEX);
-	plus1 = GetIN(ALGO_PLUS1_INDEX);
+  static int prevCount;
+  if(GetIN(ALGO_COUNT_INDEX))
+  {
+    count = prevCount ? 0 : 1;
+    prevCount = 1;
+  }
+  else
+  {
+    prevCount = 0;
+    count = 0;
+  }
+  reset = GetIN(ALGO_RESET_INDEX);
+  plus1 = GetIN(ALGO_PLUS1_INDEX);
 
-	if(reset)
-	{
-		spireCounter = 0;
-		cut = 0;
-	}
-	
-	
-	// Run control
-	if(count)
-	{
-		run = 0;
-	}
-	else if(algoDelayCounter)
-	{
-		if(!(--algoDelayCounter))
-		{
-			run = 1;
-		}
-	}
+  if(reset)
+  {
+    spireCounter = 0;
+    cut = 0;
+  }
+  
+  
+  // Run control
+  if(count)
+  {
+    run = 0;
+  }
+  else if(algoDelayCounter)
+  {
+    if(!(--algoDelayCounter))
+    {
+      run = 1;
+    }
+  }
 
-	if(spirePreset >= ALGO_MIN_SPIRES) AlgoFunc();
+  if(spirePreset >= ALGO_MIN_SPIRES) AlgoFunc();
 
-	SetOUT(ALGO_RUN_INDEX, run);
-	SetOUT(ALGO_CUT_INDEX, cut);
-
-	BcpWrite(ALGO_LINE_REGISTER, lineCounter);
-	// BcpWrite(ALGO_SPIRE_REGISTER, spireCounter);
-	BcpWrite(ALGO_DELAY_REGISTER, algoDelay);
-	BcpWrite(ALGO_TOTAL_LINES_REGISTER, lineTotal);
+  SetOUT(ALGO_RUN_INDEX, run);
+  SetOUT(ALGO_CUT_INDEX, cut);
 }
 
 void AlgoCountSpires()
 {
-	static char first = 1;
-	if(count)
-	{
-		if(first)
-		{
-			first = 0;
-		}
-		else
-		{
-			spireCounter++;
-			spireTotal++;
-		}
-	}
-	if(spireCounter >= spirePreset + plus1)
-	{
-		cut = 1;
-		AlgoFunc = WaitForReset;
-	}
+  static char first = 1;
+  if(count)
+  {
+    if(first)
+    {
+      first = 0;
+    }
+    else
+    {
+      spireCounter++;
+      spireTotal++;
+    }
+  }
+  if(spireCounter >= spirePreset + plus1)
+  {
+    cut = 1;
+    AlgoFunc = WaitForReset;
+  }
 }
 
 void WaitForReset()
 {
-	if(reset)
-	{
-		lineCounter++;
-		lineTotal++;
+  if(reset)
+  {
+    lineCounter++;
+    lineTotal++;
 
-		if(lineCounter && lineCounter == linePreset)
-		{
-			readyTotal++;
-			BcpWrite(ALGO_TOTAL_READY_REGISTER, readyTotal);
-		}
-		
-		// set delay after which run will turn on
-		if(lineCounter < linePreset)
-		{
-			algoDelayCounter = ALGO_DELAY;
-		}
-		
-		AlgoFunc = AlgoCountSpires;
-	}
+    if(lineCounter && lineCounter == linePreset)
+    {
+      readyTotal++;
+    }
+    
+    // set delay after which run will turn on
+    if(lineCounter < linePreset)
+    {
+      algoDelayCounter = ALGO_DELAY;
+    }
+    
+    AlgoFunc = AlgoCountSpires;
+  }
 }
 
 void Reset()
 {
-	lineCounter = 0;
-	spireCounter = 0;
+  lineCounter = 0;
+  spireCounter = 0;
 }
 
 void SetSpires(int spires)
 {
-	spirePreset = spires;
-	BcpWrite(ALGO_SPIRE_PRESET_REGISTER, spirePreset);
+  spirePreset = spires;
 }
 
 int GetSpireCount()
 {
-	return spireCounter;
+  return spireCounter;
 }
 
 int GetSpirePreset()
 {
-	return spirePreset;
+  return spirePreset;
 }
 
 void SetLines(int lines)
 {
-	linePreset = lines;
-	BcpWrite(ALGO_LINE_PRESET_REGISTER, linePreset);
+  linePreset = lines;
 }
 
 int GetLineCount()
 {
-	return lineCounter;
+  return lineCounter;
 }
 
 int GetLinePreset()
 {
-	return linePreset;
+  return linePreset;
 }
 
 int GetLineTotal()
 {
-	return lineTotal;
+  return lineTotal;
 }
 
 int GetReadyTotal()
 {
-	return readyTotal;
+  return readyTotal;
 }
 
 int GetDelay()
 {
-	return algoDelay;
+  return algoDelay;
 }
 
 void SetDelay(int delay)
 {
-	algoDelay = delay;
-	BcpWrite(ALGO_DELAY_REGISTER, algoDelay);
+  algoDelay = delay;
 }
 
 int GetPlus1()
 {
-	return plus1;
+  return plus1;
 }
 
 int Cut()
 {
-	return cut;
+  return cut;
 }
 
 int Run()
 {
-	return run;
+  return run;
 }
 
 void SetRun(int state)
 {
-	run = state;
+  run = state;
 }
 
 void ResetStat()
 {
-	readyTotal = 0;
-	BcpWrite(ALGO_TOTAL_READY_REGISTER, readyTotal);
-	lineTotal = 0;
+  readyTotal = 0;
+  lineTotal = 0;
 }
