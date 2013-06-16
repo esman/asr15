@@ -14,30 +14,21 @@ struct TextArea
 	int y;
 	int rows;
 	int columns;
-	char* text;
+	char text[16 * 4 + 1];
 };
+
+static struct TextArea textarea_array[1];
 
 TextArea CreateTextArea(int x, int y, int width, int height)
 {
-	static size_t const size = sizeof(struct TextArea);
-	TextArea area;
-	size_t len;
+	TextArea area = textarea_array;
 
 	assert(x >= 0 && y >= 0 && width >= 0 && height >= 0);
-
-	area = malloc(size);
-	assert(area);
-	memset(area, 0, size);
 
 	area->x = x;
 	area->y = y;
 	area->rows = height / CHAR_HEIGHT;
 	area->columns = width / CHAR_WIDTH;
-
-	len = area->rows * area->columns + 1;
-	area->text = malloc(len);
-	assert(area->text);
-	memset(area->text, 0, len);
 
 	return area;
 }

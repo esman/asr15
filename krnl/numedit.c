@@ -10,30 +10,24 @@ struct NumEdit
 	int row;
 	int column;
 	int digits;
-	char* number;
+	char number[6];
 	int pos;
 };
+
+static struct NumEdit numedit_array[2];
+static int numedit_count;
 
 int const NumEditFactor[] = {1, 10, 100, 1000, 10000};
 
 NumEdit CreateNumEdit(TextArea area, int row, int column, int digits)
 {
-	static size_t const size = sizeof(struct NumEdit);
-
-	NumEdit edit;
-
-	edit = malloc(size);
-	assert(edit);
-	memset(edit, 0, size);
+	NumEdit edit = &numedit_array[numedit_count];
 
 	edit->area = area;
 	edit->row = row;
 	edit->column = column;
 	edit->digits = digits;
 
-	edit->number = malloc(digits + 1);
-	assert(edit->number);
-	memset(edit->number, '0', digits);
 	edit->number[digits] = 0;
 
 	return edit;

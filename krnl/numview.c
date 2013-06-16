@@ -14,15 +14,12 @@ struct NumView
 
 int const NumViewFactor[] = {1, 10, 100, 1000, 10000};
 
+static struct NumView numview_array[5];
+static int numview_count;
+
 NumView CreateNumView(TextArea area, int row, int column, int digits)
 {
-	static size_t const size = sizeof(struct NumView);
-
-	NumView view;
-
-	view = malloc(size);
-	assert(view);
-	memset(view, 0, size);
+	NumView view = &numview_array[numview_count++];
 
 	view->area = area;
 	view->row = row;

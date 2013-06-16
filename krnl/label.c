@@ -13,15 +13,12 @@ struct Label
 	char const* text;
 };
 
+static struct Label labels_array[3];
+static int labels_count;
+
 Label CreateLabel(TextArea area, int row, int column, char const* text)
 {
-	static size_t const size = sizeof(struct Label);
-
-	Label label;
-
-	label = malloc(size);
-	assert(label);
-	memset(label, 0, size);
+	Label label = &labels_array[labels_count++];
 
 	label->area = area;
 	label->row = row;

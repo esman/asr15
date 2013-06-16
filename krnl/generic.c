@@ -8,14 +8,13 @@
 
 void Init()
 {
-//	InitIO();
 	LcdInit();
 	MenuInit();
 }
 
 void MainLoop()
 {
-//	AlgoMain();
+	AlgoMain();
 	MenuProc();
 	LcdCheck();
 }
