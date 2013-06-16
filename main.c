@@ -119,7 +119,26 @@ int main()
   | GPIO_CRL_CNF7_0 // Default - Input floating
   ;
 
+  GPIOC->CRH = (uint32_t) 0
+  | GPIO_CRH_CNF8_0 // Default - Input floating
+  | GPIO_CRH_CNF9_0 // Default - Input floating
+  | GPIO_CRH_CNF10_0 // Default - Input floating
+  | GPIO_CRH_CNF11_0 // Default - Input floating
+  | GPIO_CRH_CNF12_0 // Default - Input floating
+  | GPIO_CRH_CNF13_1 // Button 'DOWN' - Input pull-up
+  | GPIO_CRH_CNF14_1 // Button 'LEFT' - Input pull-up
+  | GPIO_CRH_CNF15_1 // Button 'OK' - Input pull-up
+  ;
+
   GPIOB->BSRR = UINT32_BIT(1); // FRAM_CS
+  GPIOC->BSRR = (uint32_t) 0
+  | UINT32_BIT(13) // Button 'DOWN' - Input pull-up
+  | UINT32_BIT(14) // Button 'LEFT' - Input pull-up
+  | UINT32_BIT(15) // Button 'OK' - Input pull-up
+  ;
+
+  /* Remapping */
+  AFIO->MAPR |= AFIO_MAPR_PD01_REMAP; //PD0 and PD1 to pins 5 and 6
   
  	InitWatchdog();
 

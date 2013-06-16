@@ -132,11 +132,11 @@ void MenuButtonFilter(int cur, int* prev, int* click)
 
 void MenuCheckButtons()
 {
-	MenuButtonFilter(ButtonUp(), &menuPrevUp, &menuUpClick);
-	MenuButtonFilter(ButtonDown(), &menuPrevDown, &menuDownClick);
-	MenuButtonFilter(ButtonLeft(), &menuPrevLeft, &menuLeftClick);
-	MenuButtonFilter(ButtonRight(), &menuPrevRight, &menuRightClick);
-	MenuButtonFilter(ButtonOk(), &menuPrevOk, &menuOkClick);
+	MenuButtonFilter(BUTTON_UP,    &menuPrevUp,    &menuUpClick);
+	MenuButtonFilter(BUTTON_DOWN,  &menuPrevDown,  &menuDownClick);
+	MenuButtonFilter(BUTTON_LEFT,  &menuPrevLeft,  &menuLeftClick);
+	MenuButtonFilter(BUTTON_RIGHT, &menuPrevRight, &menuRightClick);
+	MenuButtonFilter(BUTTON_OK,    &menuPrevOk,    &menuOkClick);
 }
 
 void MenuProc()
