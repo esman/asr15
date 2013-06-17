@@ -6,13 +6,18 @@ extern "C"
 {
 #endif
 
-struct TextArea;
-typedef struct TextArea* TextArea;
+#define TEXT_AREA_ROWS    4
+#define TEXT_AREA_COLUMNS 16
 
-TextArea CreateTextArea(int x, int y, int width, int height);
+typedef struct
+{
+  int x;
+  int y;
+  char text[TEXT_AREA_ROWS * TEXT_AREA_COLUMNS + 1];
+} TextArea;
 
-void SetText(TextArea area, char const* text);
-void SetChar(TextArea area, int row, int column, char c);
+void SetText(TextArea* area, char const* text);
+void SetChar(TextArea* area, int row, int column, char c);
 
 #ifdef __cplusplus
 } /* extern C */

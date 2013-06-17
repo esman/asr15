@@ -11,7 +11,7 @@
 
 void (*MenuFunc)();
 
-TextArea menuArea;
+TextArea menuArea = {0, 0, {0}};
 NumEdit menuEdit;
 NumEdit delayEdit;
 NumView menuLineCounter;
@@ -70,7 +70,6 @@ void MenuDrawResetStat();
 
 void MenuInit()
 {
-  menuArea = CreateTextArea(0, 0, 128, 64);
   menuEdit = CreateNumEdit(menuArea, 1, 6, 3);
   delayEdit = CreateNumEdit(menuArea, 1, 6, 4);
   menuLineCounter = CreateNumView(menuArea, 0, 7, 3);
@@ -382,22 +381,22 @@ void MenuResetStat()
 
 void MenuDrawMarker(int index)
 {
-  SetChar(menuArea, 0, 0, index == 0 ? '>' : ' ');
-  SetChar(menuArea, 1, 0, index == 1 ? '>' : ' ');
-  SetChar(menuArea, 2, 0, index == 2 ? '>' : ' ');
-  SetChar(menuArea, 3, 0, index == 3 ? '>' : ' ');
+  SetChar(&menuArea, 0, 0, index == 0 ? '>' : ' ');
+  SetChar(&menuArea, 1, 0, index == 1 ? '>' : ' ');
+  SetChar(&menuArea, 2, 0, index == 2 ? '>' : ' ');
+  SetChar(&menuArea, 3, 0, index == 3 ? '>' : ' ');
 }
 
 void MenuDrawRoot()
 {
-  SetText(menuArea, " яапня\n сярюбйх\n ярюрхярхйю\n мюгюд");
+  SetText(&menuArea, " яапня\n сярюбйх\n ярюрхярхйю\n мюгюд");
   MenuDrawMarker(menuRootIndex);
   MenuFunc = MenuRoot;
 }
 
 void MenuDrawWork()
 {
-  SetText(menuArea, "ярпнй     /\nбхрйнб    /\n\nббнд - лемч");
+  SetText(&menuArea, "ярпнй     /\nбхрйнб    /\n\nббнд - лемч");
   menuLines = GetLineCount();
   menuSpires = GetSpireCount();
   NumViewDraw(menuLineCounter, menuLines);
@@ -410,14 +409,14 @@ void MenuDrawWork()
 
 void MenuDrawSettings()
 {
-  SetText(menuArea, " ярпнйх\n бхрйх\n гюдепфйю\n мюгюд");
+  SetText(&menuArea, " ярпнйх\n бхрйх\n гюдепфйю\n мюгюд");
   MenuDrawMarker(menuSettingsIndex);
   MenuFunc = MenuSettings;
 }
 
 void MenuDrawStat()
 {
-  SetText(menuArea, " пскнмнб\n\n яапня\n мюгюд");
+  SetText(&menuArea, " пскнмнб\n\n яапня\n мюгюд");
   NumViewDraw(menuNumView, GetReadyTotal());
   menuStatIndex = 3;
   MenuDrawMarker(menuStatIndex);
@@ -426,42 +425,42 @@ void MenuDrawStat()
 
 void MenuDrawLines()
 {
-  SetText(menuArea, "ярпнйх\n\n\nббнд - цнрнбн");
+  SetText(&menuArea, "ярпнйх\n\n\nббнд - цнрнбн");
   NumEditDraw(menuEdit, GetLinePreset());
   MenuFunc = MenuLines;
 }
 
 void MenuDrawSpires()
 {
-  SetText(menuArea, "бхрйх\n\n\nббнд - цнрнбн");
+  SetText(&menuArea, "бхрйх\n\n\nббнд - цнрнбн");
   NumEditDraw(menuEdit, GetSpirePreset());
   MenuFunc = MenuSpires;
 }
 
 void MenuDrawDelay()
 {
-  SetText(menuArea, "гюдепфйю\n\n\nббнд - цнрнбн");
+  SetText(&menuArea, "гюдепфйю\n\n\nббнд - цнрнбн");
   NumEditDraw(delayEdit, GetDelay());
   MenuFunc = MenuDelay;
 }
 
 void MenuDrawLineStat()
 {
-  SetText(menuArea, "ярпнйх\n\n\nббнд - мюгюд");
+  SetText(&menuArea, "ярпнйх\n\n\nббнд - мюгюд");
   NumViewDraw(menuNumView, GetLineTotal());
   MenuFunc = MenuLineStat;
 }
 
 void MenuDrawReadyStat()
 {
-  SetText(menuArea, "пскнмш\n\n\nббнд - мюгюд");
+  SetText(&menuArea, "пскнмш\n\n\nббнд - мюгюд");
   NumViewDraw(menuNumView, GetReadyTotal());
   MenuFunc = MenuReadyStat;
 }
 
 void MenuDrawReset()
 {
-  SetText(menuArea, " яапня ярпнй?\n дю\n мер");
+  SetText(&menuArea, " яапня ярпнй?\n дю\n мер");
   menuResetIndex = 2;
   MenuDrawMarker(menuResetIndex);
   MenuFunc = MenuReset;
@@ -469,7 +468,7 @@ void MenuDrawReset()
 
 void MenuDrawResetStat()
 {
-  SetText(menuArea, " яапня\n ярюрхярхйх?\n дю\n мер");
+  SetText(&menuArea, " яапня\n ярюрхярхйх?\n дю\n мер");
   menuResetIndex = 3;
   MenuDrawMarker(menuResetIndex);
   MenuFunc = MenuResetStat;
