@@ -7,8 +7,13 @@
 extern "C" {
 #endif
 
-struct NumView;
-typedef struct NumView* NumView;
+typedef struct
+{
+  TextArea* area;
+  int row;
+  int column;
+  int digits;
+} NumView;
 
 NumView CreateNumView(TextArea area, int row, int column, int digits);
 void NumViewDraw(NumView view, int number);
