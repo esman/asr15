@@ -13,9 +13,10 @@ typedef enum
 } text_key_t;
 
 void TextPrintChar(unsigned row, unsigned column, char c);
+void TextPrintString(unsigned row, unsigned column, const char* str);
 void TextPrintNumber(unsigned row, unsigned column, unsigned number, unsigned digits);
 void TextEditNumber(unsigned row, unsigned column, unsigned number, unsigned digits);
 unsigned TextGetNumber(void);
-void TextOnKey(text_key_t);
+void TextOnKey(text_key_t key);
 
 #endif /* TEXT_H_ */
