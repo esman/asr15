@@ -191,6 +191,7 @@ void MenuRoot()
     {
     case 0: //reset
       MenuDrawReset();
+      while(1);
       break;
     case 1: //settings
       MenuDrawSettings();

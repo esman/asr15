@@ -25,3 +25,6 @@ settings
 
 # Hidden files
 .*
+
+# Temporary files
+*~
