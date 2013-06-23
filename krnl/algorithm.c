@@ -1,87 +1,114 @@
 #include "algorithm.h"
-#include "generic.h"
 #include "../periph/io.h"
-#include "../periph/utils.h"
-#include "../periph/display.h"
 
-#define ALGO_DELAY_SCALER 10
-#define ALGO_DELAY (algoDelay * ALGO_DELAY_SCALER)
+#define ALGO_DELAY_SCALER ((unsigned) 10)
+#define ALGO_COUNT_ON  20
+#define ALGO_COUNT_OFF 10
 
-#define ALGO_LINE_REGISTER 0
-// #define ALGO_SPIRE_REGISTER 1
-#define ALGO_SPIRE_PRESET_REGISTER 2
-#define ALGO_LINE_PRESET_REGISTER 3
-#define ALGO_DELAY_REGISTER 4
-#define ALGO_TOTAL_LINES_REGISTER 5
-#define ALGO_TOTAL_READY_REGISTER 6
+typedef enum
+{
+  ALGO_STATE_COUNT,
+  ALGO_STATE_RESET
+} algo_state_t;
 
-#define ALGO_MIN_SPIRES 5
+algo_presets_t algo_presets;
 
-int spirePreset;
-int linePreset;
-int algoDelay;
-int algoDelayCounter;
+unsigned algo_spires_counter;
+unsigned algo_delay_counter;
 
-int lineCounter;
-int spireCounter;
+unsigned algo_plus1;
 
-int lineTotal;
-int spireTotal;
-int readyTotal;
-
-int reset;
-int plus1;
-int count;
-
-int cut;
-int run;
-
-void AlgoCountSpires();
-void WaitForReset();
-void AlgoDelay();
-
-void (*AlgoFunc)() = AlgoCountSpires;
+unsigned algo_run;
 
 void AlgoMain()
 {
-  static int prevCount;
+  static algo_state_t state = ALGO_STATE_COUNT;
+  static unsigned count_filter;
+  static unsigned count_state;
+  static unsigned cut;
+
+  unsigned count = 0;
+
+  // Filter count
   if(IO_GET_COUNT)
   {
-    count = prevCount ? 0 : 1;
-    prevCount = 1;
-  }
-  else
-  {
-    prevCount = 0;
-    count = 0;
-  }
-
-  reset = IO_GET_RESET;
-  plus1 = IO_GET_PLUS1;
-
-  if(reset)
-  {
-    spireCounter = 0;
-    cut = 0;
-  }
-  
-  
-  // Run control
-  if(count)
-  {
-    run = 0;
-  }
-  else if(algoDelayCounter)
-  {
-    if(!(--algoDelayCounter))
+    if(count_filter < ALGO_COUNT_ON)
     {
-      run = 1;
+      if(++count_filter == ALGO_COUNT_ON && !count_state)
+      {
+        count_state = 1;
+        count = 1;
+      }
+    }
+  }
+  else if(count_filter > 0)
+  {
+    if(--count_filter == ALGO_COUNT_OFF)
+    {
+      count_state = 0;
     }
   }
 
-  if(spirePreset >= ALGO_MIN_SPIRES) AlgoFunc();
-  
-  if(run)
+  algo_plus1 = IO_GET_PLUS1;
+
+  if(IO_GET_RESET)
+  {
+    algo_spires_counter = 0;
+    cut = 0;
+  }
+
+  // Run control
+  if(count)
+  {
+    algo_run = 0;
+  }
+  else if(algo_delay_counter > 0)
+  {
+    if(--algo_delay_counter == 0)
+    {
+      algo_run = 1;
+    }
+  }
+
+  switch (state)
+  {
+  case ALGO_STATE_COUNT:
+    if(algo_presets.spires > 0)
+    {
+      if(count)
+      {
+        if(++algo_spires_counter >= (algo_presets.spires + algo_plus1))
+        {
+          cut = 1;
+          state = ALGO_STATE_RESET;
+        }
+      }
+    }
+    break;
+
+  case ALGO_STATE_RESET:
+    if(IO_GET_RESET)
+    {
+      unsigned lines_counter = ++algo_presets.lines_counter;
+
+      if(lines_counter == algo_presets.lines)
+      {
+        algo_presets.rolls++;
+      }
+
+      // set delay after which run will turn on
+      if(lines_counter < algo_presets.lines)
+      {
+        algo_delay_counter = algo_presets.delay * ALGO_DELAY_SCALER;
+      }
+
+      state = ALGO_STATE_COUNT;
+    }
+    break;
+  }
+
+  // Set 'run' state
+  if(algo_run)
   {
     IO_SET_RUN;
   }
@@ -89,7 +116,8 @@ void AlgoMain()
   {
     IO_RESET_RUN;
   }
-  
+
+  // Set 'cut' state
   if(cut)
   {
     IO_SET_CUT;
@@ -98,130 +126,4 @@ void AlgoMain()
   {
     IO_RESET_CUT;
   }
-}
-
-void AlgoCountSpires()
-{
-  static char first = 1;
-  if(count)
-  {
-    if(first)
-    {
-      first = 0;
-    }
-    else
-    {
-      spireCounter++;
-      spireTotal++;
-    }
-  }
-  if(spireCounter >= spirePreset + plus1)
-  {
-    cut = 1;
-    AlgoFunc = WaitForReset;
-  }
-}
-
-void WaitForReset()
-{
-  if(reset)
-  {
-    lineCounter++;
-    lineTotal++;
-
-    if(lineCounter && lineCounter == linePreset)
-    {
-      readyTotal++;
-    }
-    
-    // set delay after which run will turn on
-    if(lineCounter < linePreset)
-    {
-      algoDelayCounter = ALGO_DELAY;
-    }
-    
-    AlgoFunc = AlgoCountSpires;
-  }
-}
-
-void Reset()
-{
-  lineCounter = 0;
-  spireCounter = 0;
-}
-
-void SetSpires(int spires)
-{
-  spirePreset = spires;
-}
-
-int GetSpireCount()
-{
-  return spireCounter;
-}
-
-int GetSpirePreset()
-{
-  return spirePreset;
-}
-
-void SetLines(int lines)
-{
-  linePreset = lines;
-}
-
-int GetLineCount()
-{
-  return lineCounter;
-}
-
-int GetLinePreset()
-{
-  return linePreset;
-}
-
-int GetLineTotal()
-{
-  return lineTotal;
-}
-
-int GetReadyTotal()
-{
-  return readyTotal;
-}
-
-int GetDelay()
-{
-  return algoDelay;
-}
-
-void SetDelay(int delay)
-{
-  algoDelay = delay;
-}
-
-int GetPlus1()
-{
-  return plus1;
-}
-
-int Cut()
-{
-  return cut;
-}
-
-int Run()
-{
-  return run;
-}
-
-void SetRun(int state)
-{
-  run = state;
-}
-
-void ResetStat()
-{
-  readyTotal = 0;
-  lineTotal = 0;
 }

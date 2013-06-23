@@ -41,8 +41,8 @@ int menuSettingsIndex;
 int menuStatIndex;
 int menuResetIndex;
 
-int menuLines;
-int menuSpires;
+unsigned menuLines;
+unsigned menuSpires;
 
 void MenuWorkFunc();
 void MenuRoot();
@@ -63,7 +63,6 @@ void MenuDrawStat();
 void MenuDrawLines();
 void MenuDrawSpires();
 void MenuDrawDelay();
-void MenuDrawLineStat();
 void MenuDrawReadyStat();
 void MenuDrawReset();
 void MenuDrawResetStat();
@@ -127,10 +126,10 @@ void MenuWorkFunc()
 
   if(menuOkClick)
   {
-    if(GetLineCount() >= GetLinePreset() && GetLinePreset())
+    if(algo_presets.lines_counter >= algo_presets.lines && algo_presets.lines)
     {
-      Reset();
-      SetRun(1);
+      ALGO_RESET;
+      algo_run = 1;
       MenuDrawWork();
     }
     else
@@ -139,20 +138,20 @@ void MenuWorkFunc()
     }
     return;
   }
-  if(menuLines != GetLineCount())
+  if(menuLines != algo_presets.lines_counter)
   {
-    menuLines = GetLineCount();
+    menuLines = algo_presets.lines_counter;
     NumViewDraw(menuLineCounter, menuLines);
   }
-  if(menuSpires != GetSpireCount())
+  if(menuSpires != algo_spires_counter)
   {
-    menuSpires = GetSpireCount();
+    menuSpires = algo_spires_counter;
     NumViewDraw(menuSpireCounter, menuSpires);
   }
 
-  if(prevPlus1 != GetPlus1())
+  if(prevPlus1 != algo_plus1)
   {
-    prevPlus1 = GetPlus1();
+    prevPlus1 = algo_plus1;
     if(prevPlus1)
     {
       LabelShow(menuPlus1Label);
@@ -163,7 +162,7 @@ void MenuWorkFunc()
     }
   }
 
-  if(GetLineCount() >= GetLinePreset())
+  if(algo_presets.lines_counter >= algo_presets.lines)
   {
     if(prevReady == 0)
     {
@@ -269,7 +268,7 @@ void MenuLines()
 {
   if(menuOkClick)
   {
-    SetLines(NumEditGetNumber(menuEdit));
+    algo_presets.lines = NumEditGetNumber(menuEdit);
     MenuDrawSettings();
   }
   else if(menuUpClick) NumEditUp(menuEdit);
@@ -282,7 +281,7 @@ void MenuSpires()
 {
   if(menuOkClick)
   {
-    SetSpires(NumEditGetNumber(menuEdit));
+    algo_presets.spires = NumEditGetNumber(menuEdit);
     MenuDrawSettings();
   }
   else if(menuUpClick) NumEditUp(menuEdit);
@@ -295,7 +294,7 @@ void MenuDelay()
 {
   if(menuOkClick)
   {
-    SetDelay(NumEditGetNumber(delayEdit));
+    algo_presets.delay = NumEditGetNumber(delayEdit);
     MenuDrawSettings();
   }
   else if(menuUpClick) NumEditUp(delayEdit);
@@ -343,7 +342,7 @@ void MenuReset()
     switch(menuResetIndex)
     {
     case 1: //yes
-      Reset();
+      ALGO_RESET;
       /* no break */
     case 2: //no
       MenuDrawRoot();
@@ -369,7 +368,7 @@ void MenuResetStat()
     switch(menuResetIndex)
     {
     case 2: //yes
-      ResetStat();
+      algo_presets.rolls = 0;
       /* no break */
     case 3: //no
       MenuDrawStat();
@@ -398,13 +397,13 @@ void MenuDrawRoot()
 void MenuDrawWork()
 {
   SetText(menuArea, "ÑÒĞÎÊ     /\nÂÈÒÊÎÂ    /\n\nÂÂÎÄ - ÌÅÍŞ");
-  menuLines = GetLineCount();
-  menuSpires = GetSpireCount();
+  menuLines = algo_presets.lines_counter;
+  menuSpires = algo_spires_counter;
   NumViewDraw(menuLineCounter, menuLines);
-  NumViewDraw(menuLinePreset, GetLinePreset());
+  NumViewDraw(menuLinePreset, algo_presets.lines);
   NumViewDraw(menuSpireCounter, menuSpires);
-  NumViewDraw(menuSpirePreset, GetSpirePreset());
-  if(GetPlus1()) LabelShow(menuPlus1Label);
+  NumViewDraw(menuSpirePreset, algo_presets.spires);
+  if(algo_plus1) LabelShow(menuPlus1Label);
   MenuFunc = MenuWorkFunc;
 }
 
@@ -418,7 +417,7 @@ void MenuDrawSettings()
 void MenuDrawStat()
 {
   SetText(menuArea, " ĞÓËÎÍÎÂ\n\n ÑÁĞÎÑ\n ÍÀÇÀÄ");
-  NumViewDraw(menuNumView, GetReadyTotal());
+  NumViewDraw(menuNumView, algo_presets.rolls);
   menuStatIndex = 3;
   MenuDrawMarker(menuStatIndex);
   MenuFunc = MenuStat;
@@ -427,35 +426,28 @@ void MenuDrawStat()
 void MenuDrawLines()
 {
   SetText(menuArea, "ÑÒĞÎÊÈ\n\n\nÂÂÎÄ - ÃÎÒÎÂÎ");
-  NumEditDraw(menuEdit, GetLinePreset());
+  NumEditDraw(menuEdit, algo_presets.lines);
   MenuFunc = MenuLines;
 }
 
 void MenuDrawSpires()
 {
   SetText(menuArea, "ÂÈÒÊÈ\n\n\nÂÂÎÄ - ÃÎÒÎÂÎ");
-  NumEditDraw(menuEdit, GetSpirePreset());
+  NumEditDraw(menuEdit, algo_presets.spires);
   MenuFunc = MenuSpires;
 }
 
 void MenuDrawDelay()
 {
   SetText(menuArea, "ÇÀÄÅĞÆÊÀ\n\n\nÂÂÎÄ - ÃÎÒÎÂÎ");
-  NumEditDraw(delayEdit, GetDelay());
+  NumEditDraw(delayEdit, algo_presets.delay);
   MenuFunc = MenuDelay;
-}
-
-void MenuDrawLineStat()
-{
-  SetText(menuArea, "ÑÒĞÎÊÈ\n\n\nÂÂÎÄ - ÍÀÇÀÄ");
-  NumViewDraw(menuNumView, GetLineTotal());
-  MenuFunc = MenuLineStat;
 }
 
 void MenuDrawReadyStat()
 {
   SetText(menuArea, "ĞÓËÎÍÛ\n\n\nÂÂÎÄ - ÍÀÇÀÄ");
-  NumViewDraw(menuNumView, GetReadyTotal());
+  NumViewDraw(menuNumView, algo_presets.rolls);
   MenuFunc = MenuReadyStat;
 }
 

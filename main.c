@@ -6,23 +6,7 @@
 #include "utils.h"
 #include "periph/utils.h"
 #include "periph/watchdog.h"
-
-extern int lineCounter;
-extern int linePreset;
-extern int spirePreset;
-extern int algoDelay;
-extern int lineTotal;
-extern int readyTotal;
-
-typedef struct
-{
-  int lineCounter;
-  int linePreset;
-  int spirePreset;
-  int algoDelay;
-  int lineTotal;
-  int readyTotal;
-} persistant_t;
+#include "krnl/algorithm.h"
 
 void IniAdc (void)
 {
@@ -145,16 +129,7 @@ int main()
     FramRead (500, &passphrase, sizeof(uint32_t));
   } while(passphrase != 0xDEADBEEF);
 
-  persistant_t data_read;
-  persistant_t data_write;
-  FramRead(0, &data_read, sizeof(persistant_t));
-
-  lineCounter = data_read.lineCounter;
-  linePreset = data_read.linePreset;
-  spirePreset = data_read.spirePreset;
-  algoDelay = data_read.algoDelay;
-  lineTotal = data_read.lineTotal;
-  readyTotal = data_read.readyTotal;
+  FramRead(0, &algo_presets, sizeof(algo_presets_t));
 
   Init();
   InitWatchdog();
@@ -190,18 +165,12 @@ int main()
     {
       power_ok = 0;
 
-      data_write.lineCounter = lineCounter;
-      data_write.linePreset = linePreset;
-      data_write.spirePreset = spirePreset;
-      data_write.algoDelay = algoDelay;
-      data_write.lineTotal = lineTotal;
-      data_write.readyTotal = readyTotal;
-
+      algo_presets_t data_read;
       do
       {
-        FramWrite(0, &data_write, sizeof(persistant_t));
-        FramRead(0, &data_read, sizeof(persistant_t));
-      } while(memcmp(&data_write, &data_read, sizeof(persistant_t)));
+        FramWrite(0, &algo_presets, sizeof(algo_presets_t));
+        FramRead(0, &data_read, sizeof(algo_presets_t));
+      } while(memcmp(&algo_presets, &data_read, sizeof(algo_presets_t)));
     }
   }
 
