@@ -21,6 +21,7 @@
 *.wsdt
 *.dep
 Debug
+Release
 settings
 
 # Hidden files
