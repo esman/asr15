@@ -1,10 +1,8 @@
 #include <string.h>
-#include "stm32f10x.h"
 #include "stm32f10x_conf.h"
 #include "fram.h"
 #include "utils.h"
 #include "periph/utils.h"
-#include "periph/watchdog.h"
 #include "periph/display.h"
 #include "krnl/menu.h"
 #include "krnl/algorithm.h"
@@ -121,12 +119,18 @@ int main()
   | UINT32_BIT(15) // Button 'OK' - Input pull-up
   ;
 
+  /* FRAM initialization */
   FramInit();
   FramRead(0, &algo_presets, sizeof(algo_presets_t));
 
   LcdInit();
   MenuInit();
-  WatchdogInit();
+
+  /* IWDG configuration */
+  IWDG->KR  = 0x5555; // enable write access
+  IWDG->PR  = 1;      // !!!zero prescaler disables iwdg
+  IWDG->RLR = 300;    // timeout (empiric value)
+  IWDG->KR  = 0xCCCC; // enable watchdog
 
   /* NVIC configuration */
   NVIC->ISER[0] = UINT32_BIT(I2C1_EV_IRQn % 32);
@@ -146,7 +150,7 @@ int main()
 
   while(1)
   {
-    WatchdogReset();
+    IWDG->KR  = 0xAAAA; // Reload watchdog counter
     AlgoMain();
     MenuProc();
     LcdCheck();
