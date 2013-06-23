@@ -6,23 +6,7 @@
 #include "utils.h"
 #include "periph/utils.h"
 #include "periph/watchdog.h"
-
-extern int lineCounter;
-extern int linePreset;
-extern int spirePreset;
-extern int algoDelay;
-extern int lineTotal;
-extern int readyTotal;
-
-typedef struct
-{
-  int lineCounter;
-  int linePreset;
-  int spirePreset;
-  int algoDelay;
-  int lineTotal;
-  int readyTotal;
-} persistant_t;
+#include "krnl/algorithm.h"
 
 void IniAdc (void)
 {
@@ -35,19 +19,19 @@ void IniAdc (void)
   ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
   ADC_InitStructure.ADC_NbrOfChannel = 1;
   ADC_Init(ADC1, &ADC_InitStructure);
-  /* ADC1 regular channel14 configuration */ 
+  /* ADC1 regular channel14 configuration */
   ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1,ADC_SampleTime_1Cycles5);
   /* Enable ADC1 */
   ADC_Cmd(ADC1, ENABLE);
-  /* Enable ADC1 reset calibration register */   
+  /* Enable ADC1 reset calibration register */
   ADC_ResetCalibration(ADC1);
   /* Check the end of ADC1 reset calibration register */
   while(ADC_GetResetCalibrationStatus(ADC1));
   /* Start ADC1 calibration */
   ADC_StartCalibration(ADC1);
   /* Check the end of ADC1 calibration */
-  while(ADC_GetCalibrationStatus(ADC1));     
-  /* Start ADC1 Software Conversion */ 
+  while(ADC_GetCalibrationStatus(ADC1));
+  /* Start ADC1 Software Conversion */
   ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 }
 
@@ -65,15 +49,8 @@ int main()
   | RCC_APB2ENR_IOPAEN // enable GPIO port A
   | RCC_APB2ENR_IOPBEN // enable GPIO port B
   | RCC_APB2ENR_IOPCEN // enable GPIO port C
-  | RCC_APB2ENR_IOPDEN // enable GPIO port D
   | RCC_APB2ENR_ADC1EN // enable ADC1
   ;
-
-  /* NVIC configuration */
-  NVIC->ISER[0] = UINT32_BIT(I2C1_EV_IRQn % 32);
-  NVIC->ISER[1] = UINT32_BIT(I2C1_ER_IRQn % 32);
-  NVIC->IP[I2C1_EV_IRQn] = 0xFF;
-  NVIC->IP[I2C1_ER_IRQn] = 0xFF;
 
   /* DMA configuration */
   DMA1_Channel6->CPAR = (uint32_t) &I2C1->DR;
@@ -90,7 +67,7 @@ int main()
   | GPIO_CRL_CNF6_1 // SPI1_MISO - Input pull-down
   | GPIO_CRL_MODE7_0 | GPIO_CRL_MODE7_1 // SPI_MOSI - OUT Push-pull 50MHz
   ;
-  
+
   GPIOA->CRH = (uint32_t) 0
   | GPIO_CRH_CNF8_1 // Button 'UP' - Input pull-up
   | GPIO_CRH_CNF9_0 // Default - Input floating
@@ -101,7 +78,7 @@ int main()
   | GPIO_CRH_CNF14_0 // Default - Input floating
   | GPIO_CRH_CNF15_0 // Default - Input floating
   ;
-  
+
   GPIOB->CRL = (uint32_t) 0
   | GPIO_CRL_MODE0_0 | GPIO_CRL_MODE0_1 // FRAM_WP - OUT Push-pull 50Mhz
   | GPIO_CRL_MODE1_0 | GPIO_CRL_MODE1_1 // FRAM_CS - OUT Push-pull 50Mhz
@@ -143,11 +120,6 @@ int main()
   | UINT32_BIT(15) // Button 'OK' - Input pull-up
   ;
 
-  /* Remapping */
-  AFIO->MAPR |= AFIO_MAPR_PD01_REMAP; //PD0 and PD1 to pins 5 and 6
-  
-  InitWatchdog();
-
   /* Check FRAM is ready */
   uint32_t passphrase;
   do
@@ -156,30 +128,28 @@ int main()
     FramWrite(500, &passphrase, sizeof(uint32_t));
     FramRead (500, &passphrase, sizeof(uint32_t));
   } while(passphrase != 0xDEADBEEF);
-  
-  persistant_t data_read;
-  persistant_t data_write;
-  FramRead(0, &data_read, sizeof(persistant_t));
 
-  lineCounter = data_read.lineCounter;
-  linePreset = data_read.linePreset;
-  spirePreset = data_read.spirePreset;
-  algoDelay = data_read.algoDelay;
-  lineTotal = data_read.lineTotal;
-  readyTotal = data_read.readyTotal;
+  FramRead(0, &algo_presets, sizeof(algo_presets_t));
 
   Init();
-  
+  InitWatchdog();
+
+  /* NVIC configuration */
+  NVIC->ISER[0] = UINT32_BIT(I2C1_EV_IRQn % 32);
+  NVIC->ISER[1] = UINT32_BIT(I2C1_ER_IRQn % 32);
+  NVIC->IP[I2C1_EV_IRQn] = 0xFF;
+  NVIC->IP[I2C1_ER_IRQn] = 0xFF;
+
   GPIO_InitTypeDef GPIO_InitStructure;
   memset(&GPIO_InitStructure, 0, sizeof(GPIO_InitStructure));
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0; 
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
   GPIO_InitStructure.GPIO_Mode =  GPIO_Mode_AIN;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
   IniAdc();
-  
+
   int power_ok = 0;
-  
+
   while(1)
   {
     ResetWatchdog();
@@ -193,20 +163,16 @@ int main()
     }
     else if(power_ok)
     {
-      break;
+      power_ok = 0;
+
+      algo_presets_t data_read;
+      do
+      {
+        FramWrite(0, &algo_presets, sizeof(algo_presets_t));
+        FramRead(0, &data_read, sizeof(algo_presets_t));
+      } while(memcmp(&algo_presets, &data_read, sizeof(algo_presets_t)));
     }
   }
 
-  data_write.lineCounter = lineCounter;
-  data_write.linePreset = linePreset;
-  data_write.spirePreset = spirePreset;
-  data_write.algoDelay = algoDelay;
-  data_write.lineTotal = lineTotal;
-  data_write.readyTotal = readyTotal;
-
-  do
-  {
-    FramWrite(0, &data_write, sizeof(persistant_t));
-    FramRead(0, &data_read, sizeof(persistant_t));
-  } while(memcmp(&data_write, &data_read, sizeof(persistant_t)));
+  return 0;
 }

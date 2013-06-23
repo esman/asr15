@@ -59,8 +59,8 @@ static void FramSend(uint8_t data)
 
 static uint8_t FramRecv(void)
 {
-  uint8_t data;
-  
+  uint8_t data = 0;
+
   int i = 8;
   while(i--)
   {

@@ -1,28 +1,12 @@
 #include "menu.h"
 #include "algorithm.h"
-#include "textarea.h"
-#include "numedit.h"
-#include "numview.h"
-#include "label.h"
+#include "text.h"
 
 #include "../periph/button.h"
 
 #define MENU_BUTTON_TICKS 20
 
 void (*MenuFunc)();
-
-TextArea menuArea = {0, 0, {0}};
-NumEdit menuEdit;
-NumEdit delayEdit;
-NumView menuLineCounter;
-NumView menuLinePreset;
-NumView menuSpireCounter;
-NumView menuSpirePreset;
-NumView menuNumView;
-
-Label menuPlus1Label;
-Label menuReadyLabel;
-Label menuResetLabel;
 
 int menuPrevUp;
 int menuPrevDown;
@@ -41,8 +25,8 @@ int menuSettingsIndex;
 int menuStatIndex;
 int menuResetIndex;
 
-int menuLines;
-int menuSpires;
+unsigned menuLines;
+unsigned menuSpires;
 
 void MenuWorkFunc();
 void MenuRoot();
@@ -63,23 +47,66 @@ void MenuDrawStat();
 void MenuDrawLines();
 void MenuDrawSpires();
 void MenuDrawDelay();
-void MenuDrawLineStat();
 void MenuDrawReadyStat();
 void MenuDrawReset();
 void MenuDrawResetStat();
 
+#define MENU_LINES_EDIT_ROW 1
+#define MENU_LINES_EDIT_COL 6
+#define MENU_LINES_EDIT_DIG 3
+
+#define MENU_SPIRES_EDIT_ROW 1
+#define MENU_SPIRES_EDIT_COL 6
+#define MENU_SPIRES_EDIT_DIG 3
+
+#define MENU_DELAY_EDIT_ROW 1
+#define MENU_DELAY_EDIT_COL 6
+#define MENU_DELAY_EDIT_DIG 4
+
+#define MENU_LINES_ROW 0
+#define MENU_LINES_COL 7
+#define MENU_LINES_DIG 3
+
+#define MENU_LINES_PRESET_ROW 0
+#define MENU_LINES_PRESET_COL 11
+#define MENU_LINES_PRESET_DIG 3
+
+#define MENU_SPIRES_ROW 1
+#define MENU_SPIRES_COL 7
+#define MENU_SPIRES_DIG 3
+
+#define MENU_SPIRES_PRESET_ROW 1
+#define MENU_SPIRES_PRESET_COL 11
+#define MENU_SPIRES_PRESET_DIG 3
+
+#define MENU_ROLLS_ROW 1
+#define MENU_ROLLS_COL 6
+#define MENU_ROLLS_DIG 5
+
+#define MENU_PLUS1_ROW 1
+#define MENU_PLUS1_COL 14
+#define MENU_PLUS1_TXT "+1"
+
+#define MENU_READY_ROW 2
+#define MENU_READY_COL 0
+#define MENU_READY_TXT "  йнмеж пскнмю  "
+
+#define MENU_RESET_ROW 3
+#define MENU_RESET_COL 0
+#define MENU_RESET_TXT "ббнд - яапня    "
+
 void MenuInit()
 {
-  menuEdit = CreateNumEdit(menuArea, 1, 6, 3);
-  delayEdit = CreateNumEdit(menuArea, 1, 6, 4);
-  menuLineCounter = CreateNumView(menuArea, 0, 7, 3);
-  menuLinePreset = CreateNumView(menuArea, 0, 11, 3);
-  menuSpireCounter = CreateNumView(menuArea, 1, 7, 3);
-  menuSpirePreset = CreateNumView(menuArea, 1, 11, 3);
-  menuNumView = CreateNumView(menuArea, 1, 6, 5);
-  menuPlus1Label = CreateLabel(menuArea, 1, 14, "+1");
-  menuReadyLabel = CreateLabel(menuArea, 2, 0, "  йнмеж пскнмю  ");
-  menuResetLabel = CreateLabel(menuArea, 3, 0, "ббнд - яапня    ");
+//  menuEdit = CreateNumEdit(menuArea, 1, 6, 3);
+//  delayEdit = CreateNumEdit(menuArea, 1, 6, 4);
+//  menuLineCounter = CreateNumView(menuArea, 0, 7, 3);
+//  menuLinePreset = CreateNumView(menuArea, 0, 11, 3);
+//  menuSpireCounter = CreateNumView(menuArea, 1, 7, 3);
+//  menuSpirePreset = CreateNumView(menuArea, 1, 11, 3);
+//  menuNumView = CreateNumView(menuArea, 1, 6, 5);
+//  menuPlus1Label = CreateLabel(menuArea, 1, 14, "+1");
+//  menuReadyLabel = CreateLabel(menuArea, 2, 0, "  йнмеж пскнмю  ");
+//  menuResetLabel = CreateLabel(menuArea, 3, 0, "ббнд - яапня    ");
   MenuDrawWork();
 }
 
@@ -126,10 +153,10 @@ void MenuWorkFunc()
 
   if(menuOkClick)
   {
-    if(GetLineCount() >= GetLinePreset() && GetLinePreset())
+    if(algo_presets.lines_counter >= algo_presets.lines && algo_presets.lines)
     {
-      Reset();
-      SetRun(1);
+      ALGO_RESET;
+      algo_run = 1;
       MenuDrawWork();
     }
     else
@@ -138,36 +165,36 @@ void MenuWorkFunc()
     }
     return;
   }
-  if(menuLines != GetLineCount())
+  if(menuLines != algo_presets.lines_counter)
   {
-    menuLines = GetLineCount();
-    NumViewDraw(menuLineCounter, menuLines);
+    menuLines = algo_presets.lines_counter;
+    TextPrintNumber(MENU_LINES_ROW, MENU_LINES_COL, menuLines, MENU_LINES_DIG);
   }
-  if(menuSpires != GetSpireCount())
+  if(menuSpires != algo_spires_counter)
   {
-    menuSpires = GetSpireCount();
-    NumViewDraw(menuSpireCounter, menuSpires);
+    menuSpires = algo_spires_counter;
+    TextPrintNumber(MENU_SPIRES_EDIT_ROW, MENU_SPIRES_COL, menuSpires, MENU_SPIRES_DIG);
   }
 
-  if(prevPlus1 != GetPlus1())
+  if(prevPlus1 != algo_plus1)
   {
-    prevPlus1 = GetPlus1();
+    prevPlus1 = algo_plus1;
     if(prevPlus1)
     {
-      LabelShow(menuPlus1Label);
+      TextPrintString(MENU_PLUS1_ROW, MENU_PLUS1_COL, MENU_PLUS1_TXT);
     }
     else
     {
-      LabelHide(menuPlus1Label);
+      TextPrintString(MENU_PLUS1_ROW, MENU_PLUS1_COL, "  ");
     }
   }
 
-  if(GetLineCount() >= GetLinePreset())
+  if(algo_presets.lines_counter >= algo_presets.lines)
   {
     if(prevReady == 0)
     {
-      LabelShow(menuReadyLabel);
-      LabelShow(menuResetLabel);
+      TextPrintString(MENU_READY_ROW, MENU_READY_COL, MENU_READY_TXT);
+      TextPrintString(MENU_RESET_ROW, MENU_RESET_COL, MENU_RESET_TXT);
       prevReady = 1;
     }
   }
@@ -268,39 +295,75 @@ void MenuLines()
 {
   if(menuOkClick)
   {
-    SetLines(NumEditGetNumber(menuEdit));
+    algo_presets.lines = TextGetNumber();
     MenuDrawSettings();
   }
-  else if(menuUpClick) NumEditUp(menuEdit);
-  else if(menuDownClick) NumEditDown(menuEdit);
-  else if(menuLeftClick) NumEditLeft(menuEdit);
-  else if(menuRightClick) NumEditRight(menuEdit);
+  else if(menuUpClick)
+  {
+    TextOnKey(TEXT_KEY_UP);
+  }
+  else if(menuDownClick)
+  {
+    TextOnKey(TEXT_KEY_DOWN);
+  }
+  else if(menuLeftClick)
+  {
+    TextOnKey(TEXT_KEY_LEFT);
+  }
+  else if(menuRightClick)
+  {
+    TextOnKey(TEXT_KEY_RIGHT);
+  }
 }
 
 void MenuSpires()
 {
   if(menuOkClick)
   {
-    SetSpires(NumEditGetNumber(menuEdit));
+    algo_presets.spires = TextGetNumber();
     MenuDrawSettings();
   }
-  else if(menuUpClick) NumEditUp(menuEdit);
-  else if(menuDownClick) NumEditDown(menuEdit);
-  else if(menuLeftClick) NumEditLeft(menuEdit);
-  else if(menuRightClick) NumEditRight(menuEdit);
+  else if(menuUpClick)
+  {
+    TextOnKey(TEXT_KEY_UP);
+  }
+  else if(menuDownClick)
+  {
+    TextOnKey(TEXT_KEY_DOWN);
+  }
+  else if(menuLeftClick)
+  {
+    TextOnKey(TEXT_KEY_LEFT);
+  }
+  else if(menuRightClick)
+  {
+    TextOnKey(TEXT_KEY_RIGHT);
+  }
 }
 
 void MenuDelay()
 {
   if(menuOkClick)
   {
-    SetDelay(NumEditGetNumber(delayEdit));
+    algo_presets.delay = TextGetNumber();
     MenuDrawSettings();
   }
-  else if(menuUpClick) NumEditUp(delayEdit);
-  else if(menuDownClick) NumEditDown(delayEdit);
-  else if(menuLeftClick) NumEditLeft(delayEdit);
-  else if(menuRightClick) NumEditRight(delayEdit);
+  else if(menuUpClick)
+  {
+    TextOnKey(TEXT_KEY_UP);
+  }
+  else if(menuDownClick)
+  {
+    TextOnKey(TEXT_KEY_DOWN);
+  }
+  else if(menuLeftClick)
+  {
+    TextOnKey(TEXT_KEY_LEFT);
+  }
+  else if(menuRightClick)
+  {
+    TextOnKey(TEXT_KEY_RIGHT);
+  }
 }
 
 void MenuLineStat()
@@ -342,7 +405,7 @@ void MenuReset()
     switch(menuResetIndex)
     {
     case 1: //yes
-      Reset();
+      ALGO_RESET;
       /* no break */
     case 2: //no
       MenuDrawRoot();
@@ -368,7 +431,7 @@ void MenuResetStat()
     switch(menuResetIndex)
     {
     case 2: //yes
-      ResetStat();
+      algo_presets.rolls = 0;
       /* no break */
     case 3: //no
       MenuDrawStat();
@@ -381,43 +444,46 @@ void MenuResetStat()
 
 void MenuDrawMarker(int index)
 {
-  SetChar(&menuArea, 0, 0, index == 0 ? '>' : ' ');
-  SetChar(&menuArea, 1, 0, index == 1 ? '>' : ' ');
-  SetChar(&menuArea, 2, 0, index == 2 ? '>' : ' ');
-  SetChar(&menuArea, 3, 0, index == 3 ? '>' : ' ');
+  TextPrintChar(0, 0, index == 0 ? '>' : ' ');
+  TextPrintChar(1, 0, index == 1 ? '>' : ' ');
+  TextPrintChar(2, 0, index == 2 ? '>' : ' ');
+  TextPrintChar(3, 0, index == 3 ? '>' : ' ');
 }
 
 void MenuDrawRoot()
 {
-  SetText(&menuArea, " яапня\n сярюбйх\n ярюрхярхйю\n мюгюд");
+  TextPrintString(0, 0, " яапня\n сярюбйх\n ярюрхярхйю\n мюгюд\n");
   MenuDrawMarker(menuRootIndex);
   MenuFunc = MenuRoot;
 }
 
 void MenuDrawWork()
 {
-  SetText(&menuArea, "ярпнй     /\nбхрйнб    /\n\nббнд - лемч");
-  menuLines = GetLineCount();
-  menuSpires = GetSpireCount();
-  NumViewDraw(menuLineCounter, menuLines);
-  NumViewDraw(menuLinePreset, GetLinePreset());
-  NumViewDraw(menuSpireCounter, menuSpires);
-  NumViewDraw(menuSpirePreset, GetSpirePreset());
-  if(GetPlus1()) LabelShow(menuPlus1Label);
+  TextPrintString(0, 0, "ярпнй     /\nбхрйнб    /\n\nббнд - лемч\n");
+  menuLines = algo_presets.lines_counter;
+  menuSpires = algo_spires_counter;
+  TextPrintNumber(MENU_LINES_ROW, MENU_LINES_COL, menuLines, MENU_LINES_DIG);
+  TextPrintNumber(MENU_LINES_PRESET_ROW, MENU_LINES_PRESET_COL, algo_presets.lines, MENU_LINES_PRESET_DIG);
+  TextPrintNumber(MENU_SPIRES_ROW, MENU_SPIRES_COL, menuSpires, MENU_SPIRES_DIG);
+  TextPrintNumber(MENU_SPIRES_PRESET_ROW, MENU_SPIRES_PRESET_COL, algo_presets.spires, MENU_SPIRES_PRESET_DIG);
+  if(algo_plus1)
+  {
+    TextPrintString(MENU_PLUS1_ROW, MENU_PLUS1_COL, MENU_PLUS1_TXT);
+  }
   MenuFunc = MenuWorkFunc;
 }
 
 void MenuDrawSettings()
 {
-  SetText(&menuArea, " ярпнйх\n бхрйх\n гюдепфйю\n мюгюд");
+  TextPrintString(0, 0, " ярпнйх\n бхрйх\n гюдепфйю\n мюгюд\n");
   MenuDrawMarker(menuSettingsIndex);
   MenuFunc = MenuSettings;
 }
 
 void MenuDrawStat()
 {
-  SetText(&menuArea, " пскнмнб\n\n яапня\n мюгюд");
-  NumViewDraw(menuNumView, GetReadyTotal());
+  TextPrintString(0, 0, " пскнмнб\n\n яапня\n мюгюд\n");
+  TextPrintNumber(MENU_ROLLS_ROW, MENU_ROLLS_COL, algo_presets.rolls, MENU_ROLLS_DIG);
   menuStatIndex = 3;
   MenuDrawMarker(menuStatIndex);
   MenuFunc = MenuStat;
@@ -425,42 +491,35 @@ void MenuDrawStat()
 
 void MenuDrawLines()
 {
-  SetText(&menuArea, "ярпнйх\n\n\nббнд - цнрнбн");
-  NumEditDraw(menuEdit, GetLinePreset());
+  TextPrintString(0, 0, "ярпнйх\n\n\nббнд - цнрнбн\n");
+  TextEditNumber(MENU_LINES_EDIT_ROW, MENU_LINES_EDIT_COL, algo_presets.lines, MENU_LINES_EDIT_DIG);
   MenuFunc = MenuLines;
 }
 
 void MenuDrawSpires()
 {
-  SetText(&menuArea, "бхрйх\n\n\nббнд - цнрнбн");
-  NumEditDraw(menuEdit, GetSpirePreset());
+  TextPrintString(0, 0, "бхрйх\n\n\nббнд - цнрнбн\n");
+  TextEditNumber(MENU_SPIRES_EDIT_ROW, MENU_SPIRES_EDIT_COL, algo_presets.spires, MENU_SPIRES_EDIT_DIG);
   MenuFunc = MenuSpires;
 }
 
 void MenuDrawDelay()
 {
-  SetText(&menuArea, "гюдепфйю\n\n\nббнд - цнрнбн");
-  NumEditDraw(delayEdit, GetDelay());
+  TextPrintString(0, 0, "гюдепфйю\n\n\nббнд - цнрнбн\n");
+  TextEditNumber(MENU_DELAY_EDIT_ROW, MENU_DELAY_EDIT_COL, algo_presets.delay, MENU_DELAY_EDIT_DIG);
   MenuFunc = MenuDelay;
-}
-
-void MenuDrawLineStat()
-{
-  SetText(&menuArea, "ярпнйх\n\n\nббнд - мюгюд");
-  NumViewDraw(menuNumView, GetLineTotal());
-  MenuFunc = MenuLineStat;
 }
 
 void MenuDrawReadyStat()
 {
-  SetText(&menuArea, "пскнмш\n\n\nббнд - мюгюд");
-  NumViewDraw(menuNumView, GetReadyTotal());
+  TextPrintString(0, 0, "пскнмш\n\n\nббнд - мюгюд\n");
+  TextPrintNumber(MENU_ROLLS_ROW, MENU_ROLLS_COL, algo_presets.rolls, MENU_ROLLS_DIG);
   MenuFunc = MenuReadyStat;
 }
 
 void MenuDrawReset()
 {
-  SetText(&menuArea, " яапня ярпнй?\n дю\n мер");
+  TextPrintString(0, 0, " яапня ярпнй?\n дю\n мер\n\n");
   menuResetIndex = 2;
   MenuDrawMarker(menuResetIndex);
   MenuFunc = MenuReset;
@@ -468,7 +527,7 @@ void MenuDrawReset()
 
 void MenuDrawResetStat()
 {
-  SetText(&menuArea, " яапня\n ярюрхярхйх?\n дю\n мер");
+  TextPrintString(0, 0, " яапня\n ярюрхярхйх?\n дю\n мер\n");
   menuResetIndex = 3;
   MenuDrawMarker(menuResetIndex);
   MenuFunc = MenuResetStat;

@@ -1,9 +1,11 @@
 #include "text.h"
 #include "font.h"
+#include "../periph/display.h"
 
 #define TEXT_AREA_ROWS    4
 #define TEXT_AREA_COLUMNS 16
 
+const unsigned text_edit_factor[] = {1, 10, 100, 1000, 10000};
 char text_buff[TEXT_AREA_ROWS * TEXT_AREA_COLUMNS];
 
 unsigned text_row;
@@ -11,12 +13,30 @@ unsigned text_col;
 unsigned text_pos;
 unsigned text_end;
 
+void TextRedrawPixMap(int row, int column, unsigned char const* pixMap)
+{
+  int offx;
+  int offy;
+  int x;
+  int y;
+
+  offx = column * CHAR_WIDTH;
+  offy = row * CHAR_HEIGHT;
+  for(y = 0; y < CHAR_HEIGHT; ++y)
+  {
+    for(x = 0; x < CHAR_WIDTH; x++)
+    {
+      LcdSet(y + offy, CHAR_WIDTH - x - 1 + offx, pixMap[y] & (1 << x));
+    }
+  }
+}
+
 void TextPrintChar(unsigned row, unsigned column, char c)
 {
   if (c != text_buff[column + row * TEXT_AREA_COLUMNS])
   {
     text_buff[column + row * TEXT_AREA_COLUMNS] = c;
-    RedrawPixMap(row, column, &font[(unsigned char) c * 16]);
+    TextRedrawPixMap(row, column, &font[(unsigned char) c * 16]);
   }
 }
 
@@ -24,6 +44,18 @@ void TextPrintString(unsigned row, unsigned column, const char* str)
 {
   while(*str)
   {
+    if(*str == '\n')
+    {
+      while(column < TEXT_AREA_COLUMNS)
+      {
+        TextPrintChar(row, column, ' ');
+        column++;
+      }
+      str++;
+      row++;
+      column = 0;
+      continue;
+    }
     TextPrintChar(row, column++, *str++);
   }
 }
@@ -49,24 +81,12 @@ void TextDrawMark(void)
   TextPrintChar(text_row + 1, text_pos, '^');
 }
 
-void NumEditReDraw(NumEdit edit)
-{
-  int column;
-  for(column = edit->digits - 1; column >= 0; --column)
-  {
-    char c;
-    c = edit->number[column];
-    SetChar(edit->area, edit->row, column + edit->column, c);
-  }
-  TextDrawMark();
-}
-
 void TextEditNumber(unsigned row, unsigned column, unsigned number, unsigned digits)
 {
   text_row = row;
   text_col = column;
-  text_end = digits - 1;
-  text_pos = digits;
+  text_end = text_col + digits - 1;
+  text_pos = text_end;
 
   TextPrintNumber(row, column, number, digits);
   TextDrawMark();
@@ -75,14 +95,17 @@ void TextEditNumber(unsigned row, unsigned column, unsigned number, unsigned dig
 unsigned TextGetNumber(void)
 {
   unsigned number = 0;
-  char* symbol_addr = &text_buff[text_col + text_row * TEXT_COLUMNS];
+  char* symbol_addr = &text_buff[text_end + text_row * TEXT_COLUMNS];
 
   unsigned pos = text_end;
-  while(pos >= 0)
+  while(1)
   {
-    int factor = NumEditFactor[pos];
-    char symbol = *symbol_addr;
-    number += (symbol - '0') * factor;
+    int factor = text_edit_factor[text_end - pos];
+    number += (*symbol_addr - '0') * factor;
+    if(pos == text_col)
+    {
+      break;
+    }
     symbol_addr--;
     pos--;
   }
@@ -91,8 +114,7 @@ unsigned TextGetNumber(void)
 
 void TextOnKey(text_key_t key)
 {
-  char* symbol_addr = &text_buff[text_col + text_pos + text_row * TEXT_COLUMNS];
-  char symbol = *symbol_addr;
+  char symbol = text_buff[text_pos + text_row * TEXT_COLUMNS];
 
   switch(key)
   {
@@ -105,7 +127,7 @@ void TextOnKey(text_key_t key)
     {
       symbol++;
     }
-    break;
+    goto print_char;
 
   case TEXT_KEY_DOWN:
     if(symbol == '0')
@@ -116,23 +138,30 @@ void TextOnKey(text_key_t key)
     {
       symbol--;
     }
-    break;
+    goto print_char;
 
   case TEXT_KEY_LEFT:
-    if(text_pos > 0)
+    if(text_pos > text_col)
     {
       text_pos--;
     }
-    break;
+    goto draw_mark;
 
   case TEXT_KEY_RIGHT:
     if(text_pos < text_end)
     {
       text_pos++;
     }
-    break;
+    goto draw_mark;
   }
 
-  *symbol_addr = symbol;
+  print_char:
+  TextPrintChar(text_row, text_pos, symbol);
+  goto end;
+
+  draw_mark:
   TextDrawMark();
+  end:
+
+  return;
 }

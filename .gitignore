@@ -21,7 +21,11 @@
 *.wsdt
 *.dep
 Debug
+Release
 settings
 
 # Hidden files
 .*
+
+# Temporary files
+*~
