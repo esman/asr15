@@ -1,7 +1,7 @@
 #ifndef BUTTON_H
 #define BUTTON_H
 
-#include "../gpio.h"
+#include "gpio.h"
 
 #define BUTTON_UP_GROUP GPIOA
 #define BUTTON_UP_PIN 8

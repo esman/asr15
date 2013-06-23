@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include "display.h"
-#include "../gpio.h"
+#include "gpio.h"
 #include "../krnl/algorithm.h"
 
 #define LCD_ROWS 64

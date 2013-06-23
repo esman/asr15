@@ -1,7 +1,7 @@
 #ifndef IO_H_
 #define IO_H_
 
-#include "../gpio.h"
+#include "gpio.h"
 
 #define IO_COUNT_PORT GPIOA
 #define IO_COUNT_PIN 2

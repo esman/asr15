@@ -1,7 +1,6 @@
 #include <string.h>
-#include "stm32f10x_conf.h"
-#include "fram.h"
 #include "utils.h"
+#include "periph/fram.h"
 #include "periph/display.h"
 #include "krnl/menu.h"
 #include "krnl/algorithm.h"
