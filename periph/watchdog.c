@@ -2,7 +2,7 @@
 
 #include "stm32f10x.h"
 
-void InitWatchdog()
+void WatchdogInit()
 {
   IWDG->KR  = 0x5555; // enable write access
   IWDG->PR  = 1;      // !!!zero prescaler disables iwdg
@@ -10,7 +10,7 @@ void InitWatchdog()
   IWDG->KR  = 0xCCCC; // enable watchdog
 }
 
-void ResetWatchdog()
+void WatchdogReset()
 {
   IWDG->KR  = 0xAAAA;
 }

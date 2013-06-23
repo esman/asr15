@@ -1,11 +1,12 @@
 #include <string.h>
-#include "krnl/generic.h"
 #include "stm32f10x.h"
 #include "stm32f10x_conf.h"
 #include "fram.h"
 #include "utils.h"
 #include "periph/utils.h"
 #include "periph/watchdog.h"
+#include "periph/display.h"
+#include "krnl/menu.h"
 #include "krnl/algorithm.h"
 
 void IniAdc (void)
@@ -123,8 +124,9 @@ int main()
   FramInit();
   FramRead(0, &algo_presets, sizeof(algo_presets_t));
 
-  Init();
-  InitWatchdog();
+  LcdInit();
+  MenuInit();
+  WatchdogInit();
 
   /* NVIC configuration */
   NVIC->ISER[0] = UINT32_BIT(I2C1_EV_IRQn % 32);
@@ -144,8 +146,10 @@ int main()
 
   while(1)
   {
-    ResetWatchdog();
-    MainLoop();
+    WatchdogReset();
+    AlgoMain();
+    MenuProc();
+    LcdCheck();
 
     while(!(ADC1->SR & ADC_SR_EOC));
 
