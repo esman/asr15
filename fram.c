@@ -36,6 +36,9 @@
 #define FRAM_MOSI_RESET GPIO_RESET(FRAM_MOSI_PORT, FRAM_MOSI_PIN)
 #define FRAM_MISO_GET   GPIO_GET  (FRAM_MISO_PORT, FRAM_MISO_PIN)
 
+#define FRAM_SIZE 0x1000
+#define FRAM_MAGIC_NUMBER ((uint32_t) 0xDEADBEEF)
+
 #define FRAM_GET_ADDR_H(_code, _addr) ((_code) | ((uint8_t) (_addr >> 5) & UINT8_BIT(3)))
 
 static void FramSend(uint8_t data)
@@ -122,4 +125,17 @@ void FramRead(uint16_t addr, void* buff, size_t size)
     *mark++ = FramRecv();
   };
   FRAM_CS_SET;
+}
+
+void FramInit(void)
+{
+  /* Check FRAM is ready */
+  uint32_t data;
+  uint16_t addr = FRAM_SIZE - sizeof(data) - 1;
+  do
+  {
+    data = FRAM_MAGIC_NUMBER;
+    FramWrite(addr, &data, sizeof(data));
+    FramRead (addr, &data, sizeof(data));
+  } while(data != FRAM_MAGIC_NUMBER);
 }

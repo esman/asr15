@@ -120,15 +120,7 @@ int main()
   | UINT32_BIT(15) // Button 'OK' - Input pull-up
   ;
 
-  /* Check FRAM is ready */
-  uint32_t passphrase;
-  do
-  {
-    passphrase = 0xDEADBEEF;
-    FramWrite(500, &passphrase, sizeof(uint32_t));
-    FramRead (500, &passphrase, sizeof(uint32_t));
-  } while(passphrase != 0xDEADBEEF);
-
+  FramInit();
   FramRead(0, &algo_presets, sizeof(algo_presets_t));
 
   Init();

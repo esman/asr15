@@ -6,5 +6,6 @@
 
 void FramWrite(uint16_t addr, const void* buff, size_t size);
 void FramRead(uint16_t addr, void* buff, size_t size);
+void FramInit(void);
 
 #endif /* FRAM_H_ */
