@@ -4,7 +4,6 @@
 #include <stdint.h>
 
 #include "display.h"
-#include "utils.h"
 #include "../gpio.h"
 #include "../krnl/algorithm.h"
 
@@ -107,10 +106,10 @@ void LcdResetLine()
   uint32_t reg = GPIOB->CRL;
   reg &= ~(GPIO_CRL_CNF6_1 | GPIO_CRL_CNF7_1);
   GPIOB->CRL = reg
-  | GPIO_CRL_CNF6_0 | GPIO_CRL_MODE6_0 | GPIO_CRL_MODE6_1 
+  | GPIO_CRL_CNF6_0 | GPIO_CRL_MODE6_0 | GPIO_CRL_MODE6_1
   | GPIO_CRL_CNF7_0 | GPIO_CRL_MODE7_0 | GPIO_CRL_MODE7_1
   ;
-  
+
   // Reset line
   GPIOB->BRR = UINT32_BIT(LCD_I2C_SCL_PIN) | UINT32_BIT(LCD_I2C_SDA_PIN);
 }
@@ -118,7 +117,7 @@ void LcdResetLine()
 void I2C_Init_(void)
 {
   I2C_DeInit(LCD_I2C_PORT);
-  
+
   // Check i2c line is idle
   uint32_t reg = GPIOB->IDR;
   if(!(reg & UINT32_BIT(LCD_I2C_SDA_PIN)) && (reg & UINT32_BIT(LCD_I2C_SCL_PIN)))
@@ -129,14 +128,14 @@ void I2C_Init_(void)
   /* Configure i2c pins */
   GPIOB->CRL |= (uint32_t) 0
   // SCL - AF OD
-  | GPIO_CRL_CNF6_0 | GPIO_CRL_CNF6_1 | GPIO_CRL_MODE6_0 | GPIO_CRL_MODE6_1 
+  | GPIO_CRL_CNF6_0 | GPIO_CRL_CNF6_1 | GPIO_CRL_MODE6_0 | GPIO_CRL_MODE6_1
   // SDA - AF OD
   | GPIO_CRL_CNF7_0 | GPIO_CRL_CNF7_1 | GPIO_CRL_MODE7_0 | GPIO_CRL_MODE7_1
   ;
 
   // Enable event and error interrupts and DMA requests
   LCD_I2C_PORT->CR2 |= I2C_CR2_ITEVTEN | I2C_CR2_ITERREN | I2C_CR2_DMAEN;
-  
+
   I2C_InitTypeDef  I2C_InitStructure;
   I2C_StructInit(&I2C_InitStructure);
   I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;
@@ -157,7 +156,7 @@ void I2C_SendDMA(uint8_t addr, void const* buff, uint16_t size)
 
   lcdI2CFunc = LcdOnSB;
   lcdAddr = addr;
-  
+
   // generate START
   LCD_I2C_PORT->CR1 |= I2C_CR1_START;
 }
@@ -165,9 +164,9 @@ void I2C_SendDMA(uint8_t addr, void const* buff, uint16_t size)
 void LcdInit()
 {
   LCD_RESET_ON;
-  Delay(16000);
+  DELAY(16000);
   LCD_RESET_OFF;
-  Delay(16000);
+  DELAY(16000);
 
   LcdSystemReset();
 }
@@ -202,7 +201,7 @@ void LcdSendData()
 void LcdSystemReset()
 {
   static uint8_t const reset = 0xE2;
-  
+
   LCD_RESET_ON;
   LCD_RESET_OFF;
 
@@ -237,10 +236,10 @@ void LcdOnADDR()
 void LcdOnBTF()
 {
   int timeout = 0;
-  
+
   // generate STOP
   LCD_I2C_PORT->CR1 |= I2C_CR1_STOP;
-  
+
   // wait for STOP = 0
   while(LCD_I2C_PORT->CR1 & I2C_CR1_STOP)
   {
