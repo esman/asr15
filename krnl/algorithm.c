@@ -4,6 +4,7 @@
 #define ALGO_DELAY_SCALER ((unsigned) 10)
 #define ALGO_COUNT_ON  20
 #define ALGO_COUNT_OFF 10
+#define ALGO_COUNT_FALLING_EDGE  // detect on falling edge
 
 typedef enum
 {
@@ -37,15 +38,20 @@ void AlgoMain()
       if(++count_filter == ALGO_COUNT_ON && !count_state)
       {
         count_state = 1;
+#ifndef ALGO_COUNT_FALLING_EDGE
         count = 1;
+#endif /* ALGO_COUNT_FALLING_EDGE */
       }
     }
   }
   else if(count_filter > 0)
   {
-    if(--count_filter == ALGO_COUNT_OFF)
+    if(--count_filter == ALGO_COUNT_OFF && count_state)
     {
       count_state = 0;
+#ifdef ALGO_COUNT_FALLING_EDGE
+        count = 1;
+#endif /* ALGO_COUNT_FALLING_EDGE */
     }
   }
 
