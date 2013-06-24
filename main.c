@@ -153,22 +153,23 @@ int main()
     MenuProc();
     LcdCheck();
 
-    while(!(ADC1->SR & ADC_SR_EOC));
-
-    if(ADC1->DR >= POWER_THRESHOLD)
+    if(ADC1->SR & ADC_SR_EOC)
     {
-      power_ok = 1;
-    }
-    else if(power_ok)
-    {
-      power_ok = 0;
-
-      algo_presets_t data_read;
-      do
+      if(ADC1->DR >= POWER_THRESHOLD)
       {
-        FramWrite(0, &algo_presets, sizeof(algo_presets_t));
-        FramRead(0, &data_read, sizeof(algo_presets_t));
-      } while(memcmp(&algo_presets, &data_read, sizeof(algo_presets_t)));
+        power_ok = 1;
+      }
+      else if(power_ok)
+      {
+        power_ok = 0;
+
+        algo_presets_t data_read;
+        do
+        {
+          FramWrite(0, &algo_presets, sizeof(algo_presets_t));
+          FramRead(0, &data_read, sizeof(algo_presets_t));
+        } while(memcmp(&algo_presets, &data_read, sizeof(algo_presets_t)));
+      }
     }
   }
 
