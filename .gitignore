@@ -24,6 +24,9 @@ Debug
 Release
 settings
 
+# Build direcotory
+build
+
 # Hidden files
 .*
 
