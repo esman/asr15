@@ -4,6 +4,9 @@
 #define ALGO_DELAY_SCALER ((unsigned) 10)
 #define ALGO_COUNT_ON  20
 #define ALGO_COUNT_OFF 10
+#define ALGO_RESET_ON  200
+#define ALGO_RESET_OFF 100
+
 #define ALGO_COUNT_FALLING_EDGE  // detect on falling edge
 
 typedef enum
@@ -26,6 +29,8 @@ void AlgoMain()
   static algo_state_t state = ALGO_STATE_COUNT;
   static unsigned count_filter;
   static unsigned count_state;
+  static unsigned reset_filter;
+  static unsigned reset_state;
   static unsigned cut;
 
   unsigned count = 0;
@@ -55,9 +60,28 @@ void AlgoMain()
     }
   }
 
-  algo_plus1 = IO_GET_PLUS1;
-
+  // Filter reset
   if(IO_GET_RESET)
+  {
+    if(reset_filter < ALGO_RESET_ON)
+    {
+      if(++reset_filter == ALGO_RESET_ON)
+      {
+        reset_state = 1;
+      }
+    }
+  }
+  else if(reset_filter > 0)
+  {
+    if(--reset_filter == ALGO_RESET_OFF)
+    {
+      reset_state = 0;
+    }
+  }
+
+  algo_plus1 = IO_GET_PLUS1 ? 1 : 0;
+
+  if(reset_state)
   {
     algo_spires_counter = 0;
     cut = 0;
@@ -72,6 +96,7 @@ void AlgoMain()
   {
     if(--algo_delay_counter == 0)
     {
+      reset_state = 0;
       algo_run = 1;
     }
   }
@@ -93,7 +118,7 @@ void AlgoMain()
     break;
 
   case ALGO_STATE_RESET:
-    if(IO_GET_RESET)
+    if(reset_state)
     {
       unsigned lines_counter = ++algo_presets.lines_counter;
 
