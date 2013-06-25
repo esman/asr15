@@ -2,6 +2,7 @@ PROJECT := asr15
 TOOLCHAIN_PREFIX := arm-none-eabi-
 FLASH_ADDR := 0x08000000
 SRCDIR := src
+RESDIR := res
 OBJDIR := build
 
 C_SRCS := \
@@ -17,9 +18,11 @@ C_SRCS := \
   krnl/algorithm.c \
   krnl/menu.c \
   krnl/text.c \
-  krnl/font.c \
 
 S_SRCS := startup.S
+
+RESOURCES := \
+  font.res \
 
 LINKER_SCRIPT := script.ld
 
@@ -30,6 +33,10 @@ CFLAGS := \
   -mcpu=cortex-m3 \
   -mthumb \
   -MMD \
+  -nostdlib \
+
+LDFLAGS := \
+  --gc-sections \
 
 SYMBOLS := \
   NDEBUG \
@@ -47,16 +54,22 @@ WARNINGS := \
   -Wextra \
   -Werror \
 
+comma := ,
+RESOURCES := $(addprefix res/,$(RESOURCES))
+
 OBJS := $(C_SRCS:.c=.o)
 OBJS += $(S_SRCS:.S=.o)
+OBJS += $(RESOURCES:.res=.o)
 OBJS := $(addprefix $(OBJDIR)/, $(OBJS))
 
 SYMBOLS := $(addprefix -D, $(SYMBOLS))
 INCLUDE_DIRS := $(addprefix -I, $(INCLUDE_DIRS))
 
 CFLAGS += $(SYMBOLS) $(INCLUDE_DIRS) $(OPTIMIZATION) $(DEBUG) $(WARNINGS)
+LDFLAGS := $(addprefix -Wl$(comma),$(LDFLAGS))
 
 CC      := $(TOOLCHAIN_PREFIX)gcc
+LD      := $(TOOLCHAIN_PREFIX)ld
 OBJCOPY := $(TOOLCHAIN_PREFIX)objcopy
 OBJDUMP := $(TOOLCHAIN_PREFIX)objdump
 SIZE    := $(TOOLCHAIN_PREFIX)size
@@ -70,7 +83,7 @@ objdir:
 
 $(MAIN_TARGET): $(OBJS)
 	@echo Linking "$@"...
-	@$(CC) -T $(LINKER_SCRIPT) -nostdlib -Wl,--gc-sections -Wl,-Map,$(@:.elf=.map) $(CFLAGS) -o "$@" $(OBJS)
+	@$(CC) -T $(LINKER_SCRIPT) $(LDFLAGS) -Wl,-Map,$(@:.elf=.map) $(CFLAGS) -o "$@" $(OBJS)
 	@$(OBJCOPY) -O binary "$@" $(@:.elf=.bin)
 	@$(OBJCOPY) -O ihex "$@" $(@:.elf=.hex)
 	@$(OBJDUMP) -h -S "$@" > $(@:.elf=.lst)
@@ -83,6 +96,16 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 $(OBJDIR)/%.o: $(SRCDIR)/%.S
 	@echo Compiling "$@"...
 	@$(CC) -x assembler-with-cpp $(CFLAGS) -c -o "$@" "$<"
+
+BASENAME = $(basename $(notdir $(@)))
+
+$(OBJDIR)/%.o: $(SRCDIR)/%.res
+	@echo Compiling "$@"..
+	@$(LD) -r -b binary -o "$@" "$<"
+	@$(OBJCOPY) \
+	--rename-section .data=.rodata,readonly,contents,alloc,load,data "$@" "$@" \
+	--redefine-sym _binary_src_res_$(BASENAME)_res_start=$(BASENAME) \
+	--redefine-sym _binary_src_res_$(BASENAME)_res_size=$(BASENAME)_size \
 
 -include $(OBJS:.o=.d)
 

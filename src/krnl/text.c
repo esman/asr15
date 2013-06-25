@@ -1,10 +1,15 @@
 #include "text.h"
-#include "font.h"
 #include "../periph/display.h"
+
+#define TEXT_CHAR_WIDTH 8
+#define TEXT_CHAR_HEIGHT 16
+
+#define TEXT_FONT_SIZE (TEXT_CHAR_HEIGHT * 256)
 
 #define TEXT_AREA_ROWS    4
 #define TEXT_AREA_COLUMNS 16
 
+extern unsigned char const font[TEXT_FONT_SIZE];
 const unsigned text_edit_factor[] = {1, 10, 100, 1000, 10000};
 char text_buff[TEXT_AREA_ROWS * TEXT_AREA_COLUMNS];
 
@@ -20,13 +25,13 @@ void TextRedrawPixMap(int row, int column, unsigned char const* pixMap)
   int x;
   int y;
 
-  offx = column * CHAR_WIDTH;
-  offy = row * CHAR_HEIGHT;
-  for(y = 0; y < CHAR_HEIGHT; ++y)
+  offx = column * TEXT_CHAR_WIDTH;
+  offy = row * TEXT_CHAR_HEIGHT;
+  for(y = 0; y < TEXT_CHAR_HEIGHT; ++y)
   {
-    for(x = 0; x < CHAR_WIDTH; x++)
+    for(x = 0; x < TEXT_CHAR_WIDTH; x++)
     {
-      LcdSet(y + offy, CHAR_WIDTH - x - 1 + offx, pixMap[y] & (1 << x));
+      LcdSet(y + offy, TEXT_CHAR_WIDTH - x - 1 + offx, pixMap[y] & (1 << x));
     }
   }
 }
