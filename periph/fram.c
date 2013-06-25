@@ -36,7 +36,7 @@
 #define FRAM_MOSI_RESET GPIO_RESET(FRAM_MOSI_PORT, FRAM_MOSI_PIN)
 #define FRAM_MISO_GET   GPIO_GET  (FRAM_MISO_PORT, FRAM_MISO_PIN)
 
-#define FRAM_SIZE 0x1000
+#define FRAM_SIZE 512 // bytes
 #define FRAM_MAGIC_NUMBER ((uint32_t) 0xDEADBEEF)
 
 #define FRAM_GET_ADDR_H(_code, _addr) ((_code) | ((uint8_t) (_addr >> 5) & UINT8_BIT(3)))
