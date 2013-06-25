@@ -27,6 +27,9 @@ settings
 # Build direcotory
 build
 
+# Release directory
+release
+
 # Hidden files
 .*
 
