@@ -1,6 +1,7 @@
 PROJECT := asr15
 TOOLCHAIN_PREFIX := arm-none-eabi-
-BUILD_DIR := build
+SRCDIR := src
+OBJDIR := build
 
 C_SRCS := \
   main.c \
@@ -19,7 +20,7 @@ C_SRCS := \
 
 S_SRCS := startup.S
 
-LINKER_SCRIPT := stm32f100_ld_vl.ld
+LINKER_SCRIPT := script.ld
 
 CFLAGS := \
   -ffunction-sections \
@@ -35,7 +36,7 @@ SYMBOLS := \
   STM32F10X_LD_VL \
 
 INCLUDE_DIRS := \
-  st \
+  $(SRCDIR)/st \
 
 OPTIMIZATION := -Os
 DEBUG := -ggdb3
@@ -47,7 +48,7 @@ WARNINGS := \
 
 OBJS := $(C_SRCS:.c=.o)
 OBJS += $(S_SRCS:.S=.o)
-OBJS := $(addprefix $(BUILD_DIR)/, $(OBJS))
+OBJS := $(addprefix $(OBJDIR)/, $(OBJS))
 
 SYMBOLS := $(addprefix -D, $(SYMBOLS))
 INCLUDE_DIRS := $(addprefix -I, $(INCLUDE_DIRS))
@@ -59,11 +60,11 @@ OBJCOPY := $(TOOLCHAIN_PREFIX)objcopy
 OBJDUMP := $(TOOLCHAIN_PREFIX)objdump
 SIZE    := $(TOOLCHAIN_PREFIX)size
 
-MAIN_TARGET = $(BUILD_DIR)/$(PROJECT).elf
+MAIN_TARGET = $(OBJDIR)/$(PROJECT).elf
 
-all: objdirs $(MAIN_TARGET)
+all: objdir $(MAIN_TARGET)
 
-objdirs:
+objdir:
 	@mkdir -p $(dir $(OBJS))
 
 $(MAIN_TARGET): $(OBJS)
@@ -74,17 +75,17 @@ $(MAIN_TARGET): $(OBJS)
 	@$(OBJDUMP) -h -S "$@" > $(@:.elf=.lst)
 	@$(SIZE) --format=berkeley -t "$@"
 
-$(BUILD_DIR)/%.o: %.c
+$(OBJDIR)/%.o: $(SRCDIR)/%.c
 	@echo Compiling "$@"...
 	@$(CC) $(CFLAGS) -c -o "$@" "$<"
 
-$(BUILD_DIR)/%.o: %.S
+$(OBJDIR)/%.o: $(SRCDIR)/%.S
 	@echo Compiling "$@"...
 	@$(CC) -x assembler-with-cpp $(CFLAGS) -c -o "$@" "$<"
 
 -include $(OBJS:.o=.d)
 
 clean:
-	@rm -vrf $(BUILD_DIR)/*
+	@rm -vrf $(OBJDIR)/*
 
 .PHONY: all clean objdirs
