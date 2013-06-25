@@ -1,5 +1,6 @@
 PROJECT := asr15
 TOOLCHAIN_PREFIX := arm-none-eabi-
+FLASH_ADDR := 0x08000000
 SRCDIR := src
 OBJDIR := build
 
@@ -88,4 +89,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.S
 clean:
 	@rm -vrf $(OBJDIR)/*
 
-.PHONY: all clean objdirs
+flash: all
+	@st-flash write $(MAIN_TARGET:.elf=.bin) $(FLASH_ADDR)
+
+.PHONY: all clean objdir flash
