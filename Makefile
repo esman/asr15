@@ -1,5 +1,5 @@
 PROJECT := asr15
-TOOLCHAIN_PREFIX := arm-none-eabi
+TOOLCHAIN_PREFIX := arm-none-eabi-
 BUILD_DIR := build
 
 C_SRCS := \
@@ -54,47 +54,37 @@ INCLUDE_DIRS := $(addprefix -I, $(INCLUDE_DIRS))
 
 CFLAGS += $(SYMBOLS) $(INCLUDE_DIRS) $(OPTIMIZATION) $(DEBUG) $(WARNINGS)
 
-CC      := $(TOOLCHAIN_PREFIX)-gcc
-OBJCOPY := $(TOOLCHAIN_PREFIX)-objcopy
-OBJDUMP := $(TOOLCHAIN_PREFIX)-objdump
-SIZE    := $(TOOLCHAIN_PREFIX)-size
+CC      := $(TOOLCHAIN_PREFIX)gcc
+OBJCOPY := $(TOOLCHAIN_PREFIX)objcopy
+OBJDUMP := $(TOOLCHAIN_PREFIX)objdump
+SIZE    := $(TOOLCHAIN_PREFIX)size
 
-TARGET_NAME = $(BUILD_DIR)/$(PROJECT)
-TARGET.elf := $(TARGET_NAME).elf
-TARGET.bin := $(TARGET_NAME).bin
-TARGET.hex := $(TARGET_NAME).hex
-TARGET.lst := $(TARGET_NAME).lst
-TARGET.siz := $(TARGET_NAME).siz
+MAIN_TARGET = $(BUILD_DIR)/$(PROJECT).elf
 
-all: objdirs $(TARGET.elf) $(TARGET.bin) $(TARGET.hex) $(TARGET.lst) $(TARGET.siz)
+all: objdirs $(MAIN_TARGET)
 
 objdirs:
 	@mkdir -p $(dir $(OBJS))
 
-$(TARGET.elf): $(OBJS)
-	$(CC) -T $(LINKER_SCRIPT) -nostdlib -Xlinker --gc-sections -Wl,-Map,$(@:.elf=.map) $(CFLAGS) -o "$@" $(OBJS)
+$(MAIN_TARGET): $(OBJS)
+	@echo Linking "$@"...
+	@$(CC) -T $(LINKER_SCRIPT) -nostdlib -Wl,--gc-sections -Wl,-Map,$(@:.elf=.map) $(CFLAGS) -o "$@" $(OBJS)
+	@$(OBJCOPY) -O binary "$@" $(@:.elf=.bin)
+	@$(OBJCOPY) -O ihex "$@" $(@:.elf=.hex)
+	@$(OBJDUMP) -h -S "$@" > $(@:.elf=.lst)
+	@$(SIZE) --format=berkeley -t "$@"
 
 $(BUILD_DIR)/%.o: %.c
-	$(CC) $(CFLAGS) -c -o "$@" "$<"
+	@echo Compiling "$@"...
+	@$(CC) $(CFLAGS) -c -o "$@" "$<"
 
 $(BUILD_DIR)/%.o: %.S
-	$(CC) -x assembler-with-cpp $(CFLAGS) -c -o "$@" "$<"
-
-$(TARGET.bin): $(TARGET.elf)
-	@$(OBJCOPY) -O binary "$<" "$@"
-
-$(TARGET.hex): $(TARGET.elf)
-	@$(OBJCOPY) -O ihex "$<" "$@"
-
-$(TARGET.lst): $(TARGET.elf)
-	@$(OBJDUMP) -h -S "$<" > "$@"
-
-$(TARGET.siz): $(TARGET.elf)
-	@$(SIZE) --format=berkeley -t "$<"
+	@echo Compiling "$@"...
+	@$(CC) -x assembler-with-cpp $(CFLAGS) -c -o "$@" "$<"
 
 -include $(OBJS:.o=.d)
 
 clean:
-	rm -vrf $(BUILD_DIR)/*
+	@rm -vrf $(BUILD_DIR)/*
 
-.PHONY: all clean
+.PHONY: all clean objdirs
