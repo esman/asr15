@@ -106,6 +106,8 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.res
 	--redefine-sym _binary_src_res_$(BASENAME)_res_start=$(BASENAME) \
 	--redefine-sym _binary_src_res_$(BASENAME)_res_size=$(BASENAME)_size \
 
+$(OBJS): Makefile
+
 -include $(OBJS:.o=.d)
 
 clean:
