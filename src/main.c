@@ -80,8 +80,17 @@ int main()
   | GPIO_CRH_CNF15_1 // Button 'OK' - Input pull-up
   ;
 
-  GPIOA->BSRR = UINT32_BIT(4) | UINT32_BIT(8) | UINT32_BIT(12); // FRAM_HOLD, BUTTON_UP, BUTTON_RIGHT
-  GPIOB->BSRR = UINT32_BIT(1) | UINT32_BIT(14); // FRAM_CS, LCD_LED
+  GPIOA->BSRR = (uint32_t) 0
+  | UINT32_BIT(4)  // FRAM_HOLD
+  | UINT32_BIT(8)  // BUTTON_UP
+  | UINT32_BIT(12) // BUTTON_RIGHT
+  ;
+
+  GPIOB->BSRR = (uint32_t) 0
+  | UINT32_BIT(1)  // FRAM_CS
+  | UINT32_BIT(14) // LCD_LED
+  ;
+
   GPIOC->BSRR = (uint32_t) 0
   | UINT32_BIT(13) // Button 'DOWN' - Input pull-up
   | UINT32_BIT(14) // Button 'LEFT' - Input pull-up
