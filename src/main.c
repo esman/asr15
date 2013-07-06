@@ -5,35 +5,6 @@
 #include "krnl/menu.h"
 #include "krnl/algorithm.h"
 
-void IniAdc (void)
-{
-  ADC_InitTypeDef ADC_InitStructure;
-  /* ADC1 configuration ------------------------------------------------------*/
-  ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
-  ADC_InitStructure.ADC_ScanConvMode = ENABLE;
-  ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
-  ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
-  ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-  ADC_InitStructure.ADC_NbrOfChannel = 1;
-  ADC_Init(ADC1, &ADC_InitStructure);
-  /* ADC1 regular channel14 configuration */
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_0, 1,ADC_SampleTime_1Cycles5);
-  /* Enable ADC1 */
-  ADC_Cmd(ADC1, ENABLE);
-  /* Enable ADC1 reset calibration register */
-  ADC_ResetCalibration(ADC1);
-  /* Check the end of ADC1 reset calibration register */
-  while(ADC_GetResetCalibrationStatus(ADC1));
-  /* Start ADC1 calibration */
-  ADC_StartCalibration(ADC1);
-  /* Check the end of ADC1 calibration */
-  while(ADC_GetCalibrationStatus(ADC1));
-  /* Start ADC1 Software Conversion */
-  ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-}
-
-#define POWER_THRESHOLD ((uint16_t) 0x500)
-
 int main()
 {
   /* RCC configuration */
@@ -136,15 +107,7 @@ int main()
   NVIC->IP[I2C1_EV_IRQn] = 0xFF;
   NVIC->IP[I2C1_ER_IRQn] = 0xFF;
 
-  GPIO_InitTypeDef GPIO_InitStructure;
-  memset(&GPIO_InitStructure, 0, sizeof(GPIO_InitStructure));
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
-  GPIO_InitStructure.GPIO_Mode =  GPIO_Mode_AIN;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
-  IniAdc();
-
-  int power_ok = 0;
+  algo_presets_t presets = algo_presets;
 
   while(1)
   {
@@ -153,23 +116,10 @@ int main()
     MenuProc();
     LcdCheck();
 
-    if(ADC1->SR & ADC_SR_EOC)
+    while(memcmp(&presets, &algo_presets, sizeof(algo_presets_t)))
     {
-      if(ADC1->DR >= POWER_THRESHOLD)
-      {
-        power_ok = 1;
-      }
-      else if(power_ok)
-      {
-        power_ok = 0;
-
-        algo_presets_t data_read;
-        do
-        {
-          FramWrite(0, &algo_presets, sizeof(algo_presets_t));
-          FramRead(0, &data_read, sizeof(algo_presets_t));
-        } while(memcmp(&algo_presets, &data_read, sizeof(algo_presets_t)));
-      }
+      FramWrite(0, &algo_presets, sizeof(algo_presets_t));
+      FramRead(0, &presets, sizeof(algo_presets_t));
     }
   }
 

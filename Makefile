@@ -9,7 +9,6 @@ C_SRCS := \
   main.c \
   st/core_cm3.c \
   st/system_stm32f10x.c \
-  st/stm32f10x_adc.c \
   st/stm32f10x_gpio.c \
   st/stm32f10x_rcc.c \
   st/stm32f10x_i2c.c \
