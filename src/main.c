@@ -59,10 +59,10 @@ int main()
   | GPIO_CRL_CNF1_0 // Button 'RIGHT' - Input floating
   | GPIO_CRL_CNF2_0 // IN2 - Input floating
   | GPIO_CRL_CNF3_0 // IN1 - Input floating
-  | GPIO_CRL_MODE4_0 | GPIO_CRL_MODE4_1 // SPI1_NSS - OUT Push-pull 50Mhz
-  | GPIO_CRL_MODE5_0 | GPIO_CRL_MODE5_1 // SPI1_SCK - OUT Push-pull 50Mhz
-  | GPIO_CRL_CNF6_1 // SPI1_MISO - Input pull-down
-  | GPIO_CRL_MODE7_0 | GPIO_CRL_MODE7_1 // SPI_MOSI - OUT Push-pull 50MHz
+  | GPIO_CRL_MODE4_0 | GPIO_CRL_MODE4_1 // FRAM_HOLD - OUT Push-pull 50Mhz
+  | GPIO_CRL_MODE5_0 | GPIO_CRL_MODE5_1 // FRAM_SCK - OUT Push-pull 50Mhz
+  | GPIO_CRL_CNF6_1 // FRAM_SO - Input pull-down
+  | GPIO_CRL_MODE7_0 | GPIO_CRL_MODE7_1 // FRAM_SI - OUT Push-pull 50MHz
   ;
 
   GPIOA->CRH = (uint32_t) 0
@@ -109,7 +109,7 @@ int main()
   | GPIO_CRH_CNF15_1 // Button 'OK' - Input pull-up
   ;
 
-  GPIOA->BSRR = UINT32_BIT(8) | UINT32_BIT(12); // BUTTON_UP, BUTTON_RIGHT
+  GPIOA->BSRR = UINT32_BIT(4) | UINT32_BIT(8) | UINT32_BIT(12); // FRAM_HOLD, BUTTON_UP, BUTTON_RIGHT
   GPIOB->BSRR = UINT32_BIT(1) | UINT32_BIT(14); // FRAM_CS, LCD_LED
   GPIOC->BSRR = (uint32_t) 0
   | UINT32_BIT(13) // Button 'DOWN' - Input pull-up
