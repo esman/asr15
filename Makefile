@@ -45,7 +45,7 @@ SYMBOLS := \
 INCLUDE_DIRS := \
   $(SRCDIR)/st \
 
-OPTIMIZATION := -Os
+OPTIMIZATION := -O2
 DEBUG := -ggdb3
 
 WARNINGS := \
