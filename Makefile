@@ -8,20 +8,18 @@ OBJDIR := build
 C_SRCS := \
   main.c \
   st/core_cm3.c \
-  st/system_stm32f10x.c \
-  st/stm32f10x_gpio.c \
-  st/stm32f10x_rcc.c \
-  st/stm32f10x_i2c.c \
   periph/fram.c \
-  periph/display.c \
-  krnl/algorithm.c \
-  krnl/menu.c \
-  krnl/text.c \
+  st/system_stm32f10x.c \
+
+CPP_SRCS := \
+	timer.cpp \
+  periph/led.cpp \
+  krnl/menu.cpp \
+  krnl/algorithm.cpp \
 
 S_SRCS := startup.S
 
 RESOURCES := \
-  font.res \
 
 LINKER_SCRIPT := script.ld
 
@@ -33,19 +31,22 @@ CFLAGS := \
   -mthumb \
   -MMD \
   -nostdlib \
+  
+CXXFLAGS := \
+  -std=c++11 \
+  -fno-exceptions \
 
 LDFLAGS := \
   --gc-sections \
 
 SYMBOLS := \
   NDEBUG \
-  USE_STDPERIPH_DRIVER \
   STM32F10X_LD_VL \
 
 INCLUDE_DIRS := \
   $(SRCDIR)/st \
 
-OPTIMIZATION := -O2
+OPTIMIZATION := -O3
 DEBUG := -ggdb3
 
 WARNINGS := \
@@ -57,6 +58,7 @@ comma := ,
 RESOURCES := $(addprefix res/,$(RESOURCES))
 
 OBJS := $(C_SRCS:.c=.o)
+OBJS += $(CPP_SRCS:.cpp=.o)
 OBJS += $(S_SRCS:.S=.o)
 OBJS += $(RESOURCES:.res=.o)
 OBJS := $(addprefix $(OBJDIR)/, $(OBJS))
@@ -91,6 +93,10 @@ $(MAIN_TARGET): $(OBJS)
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	@echo Compiling "$@"...
 	@$(CC) $(CFLAGS) -c -o "$@" "$<"
+
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	@echo Compiling "$@"...
+	@$(CC) $(CFLAGS) $(CXXFLAGS) -c -o "$@" "$<"
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.S
 	@echo Compiling "$@"...

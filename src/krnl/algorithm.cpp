@@ -1,7 +1,11 @@
+extern "C"
+{
 #include "algorithm.h"
 #include "../periph/io.h"
+}
 
-#define ALGO_DELAY_SCALER ((unsigned) 10)
+#include "../timer.h"
+
 #define ALGO_COUNT_ON  20
 #define ALGO_COUNT_OFF 10
 #define ALGO_RESET_ON  200
@@ -15,16 +19,19 @@ typedef enum
   ALGO_STATE_RESET
 } algo_state_t;
 
+extern "C"
+{
 algo_presets_t algo_presets;
 
 unsigned algo_spires_counter;
-unsigned algo_delay_counter;
-
 unsigned algo_plus1;
 
 unsigned algo_run;
+}
 
-void AlgoMain()
+tmr::Timer delay_timer;
+
+extern "C" void AlgoMain()
 {
   static algo_state_t state = ALGO_STATE_COUNT;
   static unsigned count_filter;
@@ -92,13 +99,11 @@ void AlgoMain()
   {
     algo_run = 0;
   }
-  else if(algo_delay_counter > 0)
+  else if(delay_timer.Expired())
   {
-    if(--algo_delay_counter == 0)
-    {
-      reset_state = 0;
-      algo_run = 1;
-    }
+    delay_timer.Stop();
+    reset_state = 0;
+    algo_run = 1;
   }
 
   switch (state)
@@ -130,7 +135,7 @@ void AlgoMain()
       // set delay after which run will turn on
       if(lines_counter < algo_presets.lines)
       {
-        algo_delay_counter = algo_presets.delay * ALGO_DELAY_SCALER;
+        delay_timer.Reset(algo_presets.delay);
       }
 
       state = ALGO_STATE_COUNT;

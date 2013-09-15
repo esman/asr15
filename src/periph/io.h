@@ -3,17 +3,17 @@
 
 #include "gpio.h"
 
-#define IO_COUNT_PORT GPIOA
-#define IO_COUNT_PIN 2
-#define IO_RESET_PORT GPIOA
-#define IO_RESET_PIN 3
-#define IO_PLUS1_PORT GPIOA
-#define IO_PLUS1_PIN 1
+#define IO_COUNT_PORT GPIOC
+#define IO_COUNT_PIN 13
+#define IO_RESET_PORT GPIOB
+#define IO_RESET_PIN 8
+#define IO_PLUS1_PORT GPIOB
+#define IO_PLUS1_PIN 9
 
 #define IO_RUN_PORT GPIOB
-#define IO_RUN_PIN 12
+#define IO_RUN_PIN 5
 #define IO_CUT_PORT GPIOB
-#define IO_CUT_PIN 13
+#define IO_CUT_PIN 4
 
 #define IO_GET_COUNT GPIO_GET(IO_COUNT_PORT, IO_COUNT_PIN)
 #define IO_GET_RESET !GPIO_GET(IO_RESET_PORT, IO_RESET_PIN)

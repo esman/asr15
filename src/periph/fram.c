@@ -3,17 +3,17 @@
 
 /* PIN configuration */
 #define FRAM_HOLD_PORT GPIOA
-#define FRAM_HOLD_PIN  4
+#define FRAM_HOLD_PIN  3
 #define FRAM_SCK_PORT  GPIOA
-#define FRAM_SCK_PIN   5
+#define FRAM_SCK_PIN   4
 #define FRAM_MISO_PORT GPIOA
 #define FRAM_MISO_PIN  6
 #define FRAM_MOSI_PORT GPIOA
 #define FRAM_MOSI_PIN  7
 #define FRAM_WP_PORT   GPIOB
-#define FRAM_WP_PIN    0
+#define FRAM_WP_PIN    1
 #define FRAM_CS_PORT   GPIOB
-#define FRAM_CS_PIN    1
+#define FRAM_CS_PIN    0
 
 /* FRAM operation codes */
 #define FRAM_WREN 0x6 // Write enable
