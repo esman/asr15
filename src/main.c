@@ -21,8 +21,8 @@ int main()
   | GPIO_CRL_CNF1_0 // Default - Input floating
   | GPIO_CRL_CNF2_0 // Default - Input floating
   | GPIO_CRL_MODE3_0 | GPIO_CRL_MODE3_1 // FRAM_HOLD - OUT Push-pull 50Mhz
-  | GPIO_CRL_MODE4_0 | GPIO_CRL_MODE4_1 // FRAM_SCK - OUT Push-pull 50Mhz
-  | GPIO_CRL_CNF5_0 // Default - Input floating
+  | GPIO_CRL_CNF4_0 // Default - Input floating
+  | GPIO_CRL_MODE5_0 | GPIO_CRL_MODE5_1 // FRAM_SCK - OUT Push-pull 50Mhz
   | GPIO_CRL_CNF6_1 // FRAM_SO - Input pull-down
   | GPIO_CRL_MODE7_0 | GPIO_CRL_MODE7_1 // FRAM_SI - OUT Push-pull 50MHz
   ;

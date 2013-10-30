@@ -5,7 +5,7 @@
 #define FRAM_HOLD_PORT GPIOA
 #define FRAM_HOLD_PIN  3
 #define FRAM_SCK_PORT  GPIOA
-#define FRAM_SCK_PIN   4
+#define FRAM_SCK_PIN   5
 #define FRAM_MISO_PORT GPIOA
 #define FRAM_MISO_PIN  6
 #define FRAM_MOSI_PORT GPIOA
