@@ -29,7 +29,8 @@ unsigned algo_plus1;
 unsigned algo_run;
 }
 
-tmr::Timer delay_timer;
+static tmr::Timer delay_timer;
+static bool reset;
 
 extern "C" void AlgoMain()
 {
@@ -120,6 +121,10 @@ extern "C" void AlgoMain()
         }
       }
     }
+    else if(algo_presets.lines_counter >= algo_presets.lines && reset)
+    {
+      algo_run = 1;
+    }
     break;
 
   case ALGO_STATE_RESET:
@@ -143,6 +148,8 @@ extern "C" void AlgoMain()
     break;
   }
 
+  reset = false;
+
   // Set 'run' state
   if(algo_run)
   {
@@ -162,4 +169,11 @@ extern "C" void AlgoMain()
   {
     IO_RESET_CUT;
   }
+}
+
+extern "C" void AlgoReset(void)
+{
+  algo_presets.lines_counter = 0;
+  algo_spires_counter        = 0;
+  reset = true;
 }

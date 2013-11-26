@@ -244,7 +244,7 @@ extern "C" void MenuProc(void)
     indicator.SetNumber(algo_presets.lines_counter);
     if(bset.Held())
     {
-      ALGO_RESET;
+      AlgoReset();
     }
     else if(bmode.Held())
     {
@@ -262,7 +262,7 @@ extern "C" void MenuProc(void)
     indicator.SetNumber(algo_spires_counter);
     if(bset.Held())
     {
-      ALGO_RESET;
+      AlgoReset();
     }
     else if(bmode.Held())
     {
