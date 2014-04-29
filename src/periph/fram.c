@@ -36,10 +36,11 @@
 #define FRAM_MOSI_RESET GPIO_RESET(FRAM_MOSI_PORT, FRAM_MOSI_PIN)
 #define FRAM_MISO_GET   GPIO_GET  (FRAM_MISO_PORT, FRAM_MISO_PIN)
 
-#define FRAM_SIZE 512 // bytes
+#define FRAM_SIZE 2048 // bytes
 #define FRAM_MAGIC_NUMBER ((uint32_t) 0xDEADBEEF)
 
-#define FRAM_GET_ADDR_H(_code, _addr) ((_code) | ((uint8_t) (_addr >> 5) & UINT8_BIT(3)))
+#define FRAM_GET_ADDR_H(_addr) ((uint8_t) (_addr >> 8))
+#define FRAM_GET_ADDR_L(_addr) ((uint8_t) _addr)
 
 static void FramSend(uint8_t data)
 {
@@ -85,11 +86,7 @@ static uint8_t FramRecv(void)
 
 void FramWrite(uint16_t addr, const void* buff, size_t size)
 {
-  uint8_t addr_h, addr_l;
   const uint8_t* mark = (const uint8_t*) buff;
-
-  addr_h = FRAM_GET_ADDR_H(FRAM_WRIT, addr);
-  addr_l = (uint8_t) addr;
 
   FRAM_WP_SET;
 
@@ -98,8 +95,9 @@ void FramWrite(uint16_t addr, const void* buff, size_t size)
   FRAM_CS_SET;
 
   FRAM_CS_RESET;
-  FramSend(addr_h);
-  FramSend(addr_l);
+  FramSend(FRAM_WRIT);
+  FramSend(FRAM_GET_ADDR_H(addr));
+  FramSend(FRAM_GET_ADDR_L(addr));
   while (size--)
   {
     FramSend(*mark++);
@@ -111,15 +109,12 @@ void FramWrite(uint16_t addr, const void* buff, size_t size)
 
 void FramRead(uint16_t addr, void* buff, size_t size)
 {
-  uint8_t addr_h, addr_l;
   uint8_t* mark = (uint8_t*) buff;
 
-  addr_h = FRAM_GET_ADDR_H(FRAM_READ, addr);
-  addr_l = (uint8_t) addr;
-
   FRAM_CS_RESET;
-  FramSend(addr_h);
-  FramSend(addr_l);
+  FramSend(FRAM_READ);
+  FramSend(FRAM_GET_ADDR_H(addr));
+  FramSend(FRAM_GET_ADDR_L(addr));
   while (size--)
   {
     *mark++ = FramRecv();
